@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>海のいきもの クロスワード｜15ステージ＋生物学者の挑戦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;}
+body{font-family:"Noto Sans JP",system-ui,sans-serif;color:#eaf7f8;line-height:1.6;
+  background:linear-gradient(180deg,#cdeef2 0%,#7fcad6 12%,#3f9fb2 28%,#1b7088 46%,#0d5470 62%,#093d57 76%,#06283f 88%,#03141f 100%);min-height:100vh;}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(105deg,rgba(255,255,255,.05) 0 2px,transparent 2px 40px);mask:linear-gradient(180deg,#000,transparent 45%);opacity:.7;}
+.wrap{max-width:900px;margin:0 auto;padding:30px 16px 70px;position:relative;}
+header{text-align:center;margin-bottom:6px;}
+.kicker{font-family:"Kosugi Maru";letter-spacing:.2em;font-size:.76rem;color:#bfeef3;margin:0 0 8px;}
+h1{font-family:"Mochiy Pop One";font-weight:400;font-size:clamp(1.6rem,6.5vw,2.7rem);margin:0;color:#fff;text-shadow:0 3px 18px rgba(0,40,60,.5);}
+h1 .ac{color:#ffe0a3;}
+.tagline{font-family:"Kosugi Maru";color:#dff6f8;margin:12px auto 0;max-width:34em;font-size:.94rem;}
+.overall{display:flex;align-items:center;justify-content:center;gap:12px;margin:18px auto 4px;flex-wrap:wrap;}
+.overall .bar{width:min(320px,70vw);height:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:999px;overflow:hidden;}
+.overall .bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffd479,#ff9d54);transition:width .4s;}
+.overall .otext{font-family:"Mochiy Pop One";font-size:.9rem;color:#fff;}
+.rounds{font-family:"Kosugi Maru";font-size:.8rem;color:#cdeef2;text-align:center;margin:6px 0 16px;opacity:.9;}
+.typecta{display:block;margin:14px auto 4px;max-width:560px;text-align:center;text-decoration:none;
+  background:linear-gradient(180deg,#ffd479,#ff9d54);color:#5a3000;font-family:"Mochiy Pop One";font-size:1.05rem;
+  border-radius:14px;padding:13px 16px;box-shadow:0 14px 30px -14px rgba(255,140,60,.6);transition:transform .12s;}
+.typecta:hover{transform:translateY(-2px);}
+.typecta small{display:block;font-family:"Kosugi Maru";font-size:.74rem;font-weight:400;color:#7a4a20;margin-top:3px;}
+.ladder{display:flex;flex-direction:column;gap:14px;}
+.row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:12px 12px 14px;}
+.row h2{font-family:"Mochiy Pop One";font-weight:400;font-size:1.02rem;margin:0 0 3px;color:#fff;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.row .depth{font-family:"Kosugi Maru";font-size:.72rem;color:#bfe3e9;opacity:.85;font-weight:400;}
+.row .cells{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}
+@media(max-width:560px){.row .cells{grid-template-columns:1fr;}}
+.stage{display:block;text-decoration:none;color:inherit;border-radius:13px;padding:12px 12px 11px;position:relative;min-height:96px;
+  border:1px solid rgba(255,255,255,.18);background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(255,255,255,.04));transition:transform .12s,box-shadow .12s;}
+.stage.open{cursor:pointer;}
+.stage.open:hover{transform:translateY(-2px);box-shadow:0 16px 30px -18px rgba(0,0,0,.6);}
+.stage.locked{opacity:.45;filter:saturate(.4);cursor:not-allowed;}
+.stage.cleared{background:linear-gradient(150deg,rgba(126,224,170,.30),rgba(60,170,140,.12));border-color:rgba(150,240,190,.5);}
+.stage .pn{font-family:"Mochiy Pop One";font-size:.8rem;color:#cdeef2;}
+.stage .nm{font-family:"Mochiy Pop One";font-size:1.02rem;color:#fff;margin:3px 0 2px;}
+.stage .meta{font-family:"Kosugi Maru";font-size:.76rem;opacity:.9;}
+.stage .state{position:absolute;right:10px;top:10px;font-size:1.05rem;}
+.stage .cta{position:absolute;right:12px;bottom:10px;font-family:"Mochiy Pop One";font-size:.78rem;background:#ff7350;color:#fff;padding:5px 12px;border-radius:999px;}
+.stage.cleared .cta{background:#3aa886;}
+.stage.locked .cta{display:none;}
+.boss{margin-top:20px;border-radius:18px;padding:18px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,#0a3047,#05101b);border:1.5px solid rgba(255,224,163,.35);box-shadow:0 22px 50px -20px #000;}
+.boss.locked{opacity:.6;filter:saturate(.5);}
+.boss .crown{font-size:2rem;}
+.boss h2{font-family:"Mochiy Pop One";font-weight:400;font-size:1.4rem;color:#ffe0a3;margin:4px 0;}
+.boss .meta{font-family:"Kosugi Maru";font-size:.86rem;color:#dff6f8;}
+.boss .cta{display:inline-block;margin-top:12px;font-family:"Mochiy Pop One";font-size:.95rem;background:#ff7350;color:#fff;padding:10px 22px;border-radius:999px;text-decoration:none;}
+.boss.locked .cta{background:#41607a;pointer-events:none;}
+.boss .lockmsg{font-family:"Kosugi Maru";font-size:.8rem;color:#ffd9b0;margin-top:8px;}
+.note{margin-top:26px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:14px 16px;font-family:"Kosugi Maru";font-size:.84rem;color:#e7f7f8;}
+.note b{color:#ffe0a3;}
+.foot{text-align:center;margin-top:22px;font-family:"Kosugi Maru";font-size:.74rem;color:#bfe3e9;opacity:.8;}
+.reset{display:block;margin:14px auto 0;background:transparent;border:1px solid rgba(255,255,255,.3);color:#cdeef2;font-family:"Kosugi Maru";font-size:.76rem;border-radius:999px;padding:6px 16px;cursor:pointer;}
+.reset:hover{background:rgba(255,255,255,.1);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">えのすい・海のいきもの</p>
+    <h1>海のいきもの <span class="ac">クロスワード</span></h1>
+    <p class="tagline">クリアするごとに、次の難易度が<strong>ひとつ解放</strong>。<br>小学生から大学院・博士、そして<strong>生物学者レベル</strong>へ。全16ステージの旅。</p>
+  </header>
+  <div class="overall">
+    <div class="bar"><i id="obar"></i></div>
+    <span class="otext" id="otext">0 / 15 クリア</span>
+  </div>
+  <a class="typecta" href="typing.html">🎮 タイピングゲームで遊ぶ <small>息ぬき・腕だめしに。海のいきものでタイピング対戦（ランキングあり）</small></a>
+  <p class="rounds">①をクリアすると「同じ難易度の②」と「次の難易度の①」が解放。②③は同じ難易度を順に進めて解放します。</p>
+  <div class="ladder" id="ladder"></div>
+  <div class="boss locked" id="boss">
+    <div class="crown">👑🔱</div>
+    <h2>生物学者編・超絶 150×150</h2>
+    <p class="meta">全413問 ／ 海洋から分子・細胞まで、生物学の全領域</p>
+    <a class="cta" id="bossCta" href="#">挑戦する</a>
+    <p class="lockmsg" id="bossLock">15ステージをすべてクリアすると解放されます</p>
+  </div>
+  <div class="note">
+    <b>あそびかた</b>　マスをタップ → ローマ字でそのまま入力（A→ア、KA→カ）。正しくうめると、キーワードのマスが<b>金色に浮かびます</b>。選択中の問題は画面上部に常に表示され、ウィンドウを開かなくても解けます。とちゅうでやめても<b>自動で保存</b>。各ステージは何度でも遊べます。<br>
+    ※進行状況はこの端末・ブラウザに保存されます。
+  </div>
+  <button class="reset" id="resetBtn">進行状況をリセット</button>
+  <p class="foot">海のいきもの クロスワード ・ 5段階×3パターン＋生物学者編／全16ステージ</p>
+</div>
+<script>
+const DIFF=[
+ {k:"e",grade:"小学生編",depth:"潮だまり 0m",fish:"🐡",sizes:["11×11・全15問","12×13・全19問","12×10・全14問"]},
+ {k:"m",grade:"中学生編",depth:"浅い海 〜50m",fish:"🐠",sizes:["28×28・全55問","28×28・全55問","28×28・全54問"]},
+ {k:"h",grade:"高校生編",depth:"大陸棚〜中深層 〜1000m",fish:"🦈",sizes:["42×42・全106問","42×42・全105問","42×39・全106問"]},
+ {k:"u",grade:"大学生編",depth:"漸深層 〜4000m",fish:"🐙",sizes:["56×56・全148問","56×56・全148問","55×56・全148問"]},
+ {k:"g",grade:"大学院・博士編",depth:"超深海・熱水噴出孔 〜6000m+",fish:"🐋",sizes:["74×74・全193問","74×74・全193問","74×74・全193問"]},
+];
+const PAT=["①","②","③"];
+function done(id){try{return localStorage.getItem("umicw:done:"+id)==="1";}catch(e){return false;}}
+function sid(di,p){return DIFF[di].k+(p+1);}            // p:0-2
+// 解放ルール：①は「前の難易度の①」をクリアで解放（最初の難易度の①は常に解放）。
+// ②③は「同じ難易度の前パターン」をクリアで解放。
+function unlocked(di,p){
+  if(p===0) return di===0 || done(sid(di-1,0));
+  return done(sid(di,p-1));
+}
+function render(){
+  const lad=document.getElementById("ladder");lad.innerHTML="";let cleared=0;
+  DIFF.forEach((d,di)=>{
+    const row=document.createElement("div");row.className="row";
+    row.innerHTML='<h2>'+d.fish+' '+d.grade+'<span class="depth">'+d.depth+'</span></h2>';
+    const cells=document.createElement("div");cells.className="cells";
+    for(let p=0;p<3;p++){
+      const id=d.k+(p+1);const isDone=done(id);const isOpen=unlocked(di,p);
+      if(isDone)cleared++;
+      const a=document.createElement(isOpen?"a":"div");
+      a.className="stage "+(isDone?"cleared":(isOpen?"open":"locked"));
+      if(isOpen)a.href=id+".html";
+      a.innerHTML='<div class="pn">チャレンジ '+PAT[p]+'</div>'+
+        '<div class="nm">'+d.grade.replace("編","")+' '+PAT[p]+'</div>'+
+        '<div class="meta">'+d.sizes[p]+'</div>'+
+        '<div class="state">'+(isDone?"🏅":(isOpen?"🌊":"🔒"))+'</div>'+
+        '<div class="cta">'+(isDone?"もう一度":"挑戦")+'</div>';
+      cells.appendChild(a);
+    }
+    row.appendChild(cells);lad.appendChild(row);
+  });
+  document.getElementById("obar").style.width=Math.round(cleared/15*100)+"%";
+  document.getElementById("otext").textContent=cleared+" / 15 クリア";
+  const boss=document.getElementById("boss"),cta=document.getElementById("bossCta"),lock=document.getElementById("bossLock");
+  boss.classList.remove("cleared");
+  if(cleared>=15){boss.classList.remove("locked");cta.href="boss.html";lock.textContent="解放されました！生物学者の称号をかけて挑もう。";
+    if(done("boss")){boss.classList.add("cleared");cta.textContent="もう一度挑戦";lock.textContent="クリア済み！あなたは生物学者です 🎓";}}
+  else{boss.classList.add("locked");cta.href="#";cta.textContent="挑戦する";lock.textContent="あと "+(15-cleared)+" ステージで解放されます";}
+}
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  if(confirm("すべての進行状況（クリア記録）を消します。よろしいですか？")){
+    try{const rm=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf("umicw:done:")===0)rm.push(k);}rm.forEach(k=>localStorage.removeItem(k));}catch(e){}
+    render();
+  }
+});
+document.getElementById("bossCta").addEventListener("click",e=>{if(document.getElementById("boss").classList.contains("locked"))e.preventDefault();});
+render();
+</script>
+</body>
+</html>

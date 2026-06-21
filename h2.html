@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>海のいきもの 超大型クロスワード（高校生編 ②）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea-deep:#082b3a; --sea:#10617a; --sea-soft:#5fb8c9;
+  --foam:#eef8f7; --line:#bcdfe2;
+  --sand:#ffe0a3; --sand-deep:#eab14a; --sand-ink:#7c5310;
+  --coral:#ff7350; --coral-deep:#cf4226;
+  --ink:#082b3a; --white:#fff; --correct:#1f9c75; --wrong:#e8503f;
+  --win:#1f6f86;
+  --cell:clamp(15px,1.7vw,22px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;}
+body{font-family:"Noto Sans JP",system-ui,sans-serif;color:var(--ink);line-height:1.5;
+  background:radial-gradient(1600px 800px at 50% -14%,#f0fbfa 0,transparent 55%),linear-gradient(180deg,#e3f3f3,#c7e6e8);
+  padding:14px 10px 30px;overflow-x:hidden;}
+.wrap{max-width:1280px;margin:0 auto;}
+header{text-align:center;margin-bottom:8px;}
+.eyebrow{font-family:"Kosugi Maru";letter-spacing:.15em;color:var(--sea);font-size:.74rem;margin:0 0 4px;}
+.homelink{display:inline-block;font-family:"Kosugi Maru";font-size:.82rem;color:var(--sea);text-decoration:none;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:8px;}
+.homelink:hover{background:#f1fbfb;}
+h1{font-family:"Mochiy Pop One";font-weight:400;color:var(--sea-deep);font-size:clamp(1.3rem,4.8vw,2.2rem);margin:0;text-shadow:0 2px 0 #fff;}
+h1 .ac{color:var(--coral);}
+h1 .grade{font-size:.55em;color:var(--sea);}
+.lead{font-family:"Kosugi Maru";color:#33606d;margin:6px auto 0;max-width:44em;font-size:.9rem;}
+.lead strong{color:var(--sand-ink);}
+
+/* toolbar */
+.toolbar{position:sticky;top:0;z-index:30;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  padding:8px;margin:8px auto 0;background:rgba(231,245,245,.82);backdrop-filter:blur(6px);border-radius:14px;max-width:max-content;}
+.tbtn{font-family:"Kosugi Maru";font-size:.92rem;border:0;border-radius:999px;padding:9px 16px;cursor:pointer;
+  box-shadow:0 5px 12px -6px rgba(8,43,58,.5);transition:transform .06s,filter .1s;}
+.tbtn:active{transform:translateY(1px);}
+.tbtn.primary{background:var(--coral);color:#fff;}
+.tbtn.win{background:var(--win);color:#fff;}
+.tbtn.ghost{background:#fff;color:var(--sea);border:1.5px solid var(--line);box-shadow:none;}
+.tbtn.on{outline:2.5px solid var(--coral);}
+
+/* grid */
+.gridcard{position:relative;background:linear-gradient(160deg,#fff,#f2fbfb);border:1px solid var(--line);border-radius:14px;padding:10px;
+  box-shadow:0 16px 34px -22px rgba(8,43,58,.5);margin-top:10px;}
+.scroll{overflow:auto;max-width:100%;max-height:72vh;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;}
+.grid{position:relative;display:grid;gap:1.5px;width:max-content;margin:0 auto;
+  grid-template-columns:repeat(42,var(--cell));grid-template-rows:repeat(42,var(--cell));}
+.cell{position:relative;}
+.cell.block{background:transparent;}
+.cell.fill{background:#fff;border:1px solid #cfe6e8;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-family:"Kosugi Maru";font-size:calc(var(--cell)*.58);color:var(--ink);user-select:none;
+  transition:background .1s,border-color .1s;}
+.cell.key{background:var(--sand);border-color:var(--sand-deep);}
+.cell.inword{background:#dff3f6;border-color:var(--sea-soft);}
+.cell.key.inword{background:#ffe7b4;}
+.cell.sel{border-color:var(--coral);border-width:2px;background:#fff1ec;}
+.cell.key.sel{background:#ffdca3;}
+.cell.correct{color:var(--correct);}
+.cell.wrong{color:var(--wrong);animation:sh .3s;}
+@keyframes sh{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.cell .num{position:absolute;top:-1px;left:1px;font-size:calc(var(--cell)*.33);color:#7da3ab;font-weight:700;line-height:1;font-family:"Noto Sans JP";}
+.cell.key .num{color:var(--sand-ink);}
+.cell .kbadge{position:absolute;bottom:-1px;right:1px;font-size:calc(var(--cell)*.4);color:var(--coral-deep);font-weight:700;line-height:1;font-family:"Noto Sans JP";}
+#entry{position:absolute;opacity:0;border:0;padding:0;margin:0;width:var(--cell);height:var(--cell);font-size:16px;background:transparent;caret-color:transparent;pointer-events:none;}
+
+/* collected keyword */
+.collect{margin:12px auto 0;background:#fffaf0;border:1px dashed var(--sand-deep);border-radius:13px;padding:10px;text-align:center;max-width:680px;}
+.collect .clabel{font-family:"Kosugi Maru";color:var(--sand-ink);font-size:.8rem;margin:0 0 8px;}
+.slots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;}
+.slot{width:34px;height:40px;border-radius:8px;background:#fff;border:2px solid var(--sand-deep);display:flex;align-items:center;justify-content:center;
+  font-family:"Mochiy Pop One";font-size:1.15rem;color:var(--coral-deep);position:relative;}
+.slot .n{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:.56rem;background:var(--sand-deep);color:#fff;border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;font-family:"Noto Sans JP";font-weight:700;}
+.slot.done{background:#fff2d4;animation:pp .25s;}
+@keyframes pp{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.msg{text-align:center;font-family:"Kosugi Maru";margin-top:10px;min-height:1.3em;color:var(--sea);font-size:.95rem;}
+.hint{text-align:center;font-family:"Kosugi Maru";color:#5a8893;font-size:.8rem;margin-top:6px;}
+
+/* ---------- floating windows ---------- */
+.fwin{position:fixed;z-index:60;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 24px 50px -16px rgba(8,43,58,.55);display:none;flex-direction:column;overflow:hidden;}
+.fwin.show{display:flex;animation:wpop .16s ease-out;}
+@keyframes wpop{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:none}}
+.fbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:linear-gradient(180deg,#16708a,#10617a);color:#fff;cursor:grab;touch-action:none;user-select:none;}
+.fbar:active{cursor:grabbing;}
+.fbar .ftitle{font-family:"Mochiy Pop One";font-weight:400;font-size:.92rem;flex:1;}
+.fbar .fbtns{display:flex;gap:6px;}
+.fbar button{border:0;background:rgba(255,255,255,.18);color:#fff;width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:.9rem;font-family:"Noto Sans JP";line-height:1;}
+.fbar button:hover{background:rgba(255,255,255,.32);}
+.fbody{overflow:auto;padding:10px;}
+.fwin .fbody{flex:1 1 auto;min-height:0;}
+/* keyboard window: always translucent so cells/clues show through; opaque on interaction */
+#kbWin{opacity:.82;transition:opacity .15s;}
+#kbWin:hover,#kbWin.active{opacity:1;}
+/* clue window: long-press toggles translucent */
+#cluesWin.trans{opacity:.5;}
+.statusbar{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;}
+.curclue{flex:1 1 auto;min-width:0;background:#eef9fb;border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-family:"Kosugi Maru";font-size:.9rem;color:var(--ink);}
+.curclue .cdir{display:inline-block;background:var(--sea);color:#fff;border-radius:6px;font-size:.72rem;padding:1px 7px;margin-right:7px;font-family:"Mochiy Pop One";}
+.curclue .ctxt{color:#0c3a4a;}
+.progress{display:flex;align-items:center;gap:8px;flex:none;}
+.progress .pbar{width:120px;height:10px;background:#dceef1;border-radius:999px;overflow:hidden;border:1px solid var(--line);}
+.progress .pbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#33b5c4,#0c8aa0);transition:width .2s;}
+.progress .pct{font-family:"Kosugi Maru";font-size:.82rem;color:var(--sea);min-width:120px;}
+.fresize{position:absolute;right:1px;bottom:1px;width:20px;height:20px;cursor:nwse-resize;touch-action:none;z-index:6;
+  background:linear-gradient(135deg,transparent 45%,#9cc3cc 45%,#9cc3cc 58%,transparent 58%,transparent 70%,#9cc3cc 70%,#9cc3cc 83%,transparent 83%);border-bottom-right-radius:13px;}
+.fwin.min .fresize{display:none;}
+.zoomctl{display:flex;align-items:center;gap:6px;flex:none;background:#eef9fb;border:1px solid var(--line);border-radius:10px;padding:5px 8px;}
+.zoomctl .zcap{font-family:"Kosugi Maru";font-size:.74rem;color:var(--sea);}
+.zoomctl button{border:0;background:#16708a;color:#fff;width:30px;height:30px;border-radius:50%;font-size:1.15rem;line-height:1;cursor:pointer;font-family:"Noto Sans JP";}
+.zoomctl button:active{transform:scale(.93);}
+.zoomctl .zlbl{font-family:"Kosugi Maru";font-size:.78rem;color:#16708a;min-width:42px;text-align:center;cursor:pointer;}
+.imewarn{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:200;display:none;max-width:94vw;
+  background:#fff3cd;border:1.5px solid #e0b94d;color:#7a5b00;border-radius:12px;padding:10px 14px;font-family:"Kosugi Maru";font-size:.85rem;
+  box-shadow:0 12px 30px -12px rgba(0,0,0,.4);align-items:center;gap:10px;line-height:1.5;}
+.imewarn.show{display:flex;}
+.kwask{font-family:"Kosugi Maru";font-size:.92rem;color:var(--ink);margin:6px 0 4px;}
+.kwask2{font-family:"Kosugi Maru";font-size:.86rem;color:#3b6470;margin:6px 0 10px;}
+.kwcollect{font-family:"Mochiy Pop One";font-size:clamp(1.3rem,5vw,2rem);letter-spacing:.12em;color:var(--coral-deep);
+  background:linear-gradient(180deg,#fff6e6,#ffe9c7);border:1.5px solid var(--gold,#ffc14d);border-radius:12px;padding:8px 12px;display:inline-block;margin:2px 0 4px;}
+.kwinrow{display:flex;gap:8px;justify-content:center;margin:6px 0 2px;}
+.kwinrow input{font-family:"Kosugi Maru";font-size:1.1rem;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;width:min(260px,70%);text-align:center;}
+.kwinrow input.shake{animation:shk .18s;}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.kwmsg{font-family:"Kosugi Maru";font-size:.84rem;color:var(--wrong,#e0532e);min-height:1.2em;margin:6px 0 0;}
+.unlocked{font-family:"Mochiy Pop One";color:#1d8a6a;font-size:1.05rem;margin:10px 0 2px;}
+.winbtns{display:flex;gap:10px;justify-content:center;margin-top:10px;flex-wrap:wrap;}
+.winbtns .homeb{text-decoration:none;display:inline-flex;align-items:center;}
+.imewarn b{color:#b3320b;}
+.imewarn button{border:0;background:#e0b94d;color:#5a4300;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:.9rem;flex:none;}
+
+/* clues window */
+#cluesWin{width:min(420px,92vw);height:min(54vh,520px);left:auto;right:18px;top:120px;}
+#cluesWin.min .fbody{display:none;}
+#cluesWin.min{height:auto!important;}
+#cluesWin .fbody{scroll-padding-top:58px;}
+.clues h2{font-family:"Mochiy Pop One";font-weight:400;font-size:.96rem;color:var(--sea);margin:2px 0 7px;display:flex;align-items:center;gap:7px;background:#fff;padding-bottom:4px;}
+.cluelist li{scroll-margin-top:58px;}
+.clues h2 .pin{width:30px;height:21px;border-radius:6px;background:var(--sea);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-family:"Kosugi Maru";}
+.cluelist{list-style:none;padding:0;margin:0 0 14px;}
+.cluelist li{padding:6px 8px;border-radius:8px;margin-bottom:2px;cursor:pointer;display:flex;gap:8px;align-items:baseline;font-size:.85rem;transition:background .1s;}
+.cluelist li:hover{background:#eef8f7;}
+.cluelist li.activeclue{background:#fff0e9;box-shadow:inset 0 0 0 1.5px var(--coral);}
+.cluelist li.solved{color:#a7c5c8;text-decoration:line-through;}
+.cnum{font-family:"Mochiy Pop One";color:var(--coral);min-width:1.7em;text-align:right;font-size:.82rem;}
+.cluesearch{position:sticky;top:0;display:flex;gap:6px;margin-bottom:8px;background:#fff;z-index:2;}
+.savestate{font-family:"Kosugi Maru";font-size:.78rem;color:#7da3ab;align-self:center;transition:color .2s;}
+.savestate.flash{color:var(--correct);}
+#kbWin.min .fbody{display:none;}
+#kbWin.min{height:auto!important;}
+.cluesearch input{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:6px 9px;font-size:.85rem;font-family:"Noto Sans JP";}
+
+/* keyboard window */
+#kbWin{width:min(270px,72vw);left:18px;bottom:18px;top:auto;}
+.kbmode{display:none;}
+.kbhint{display:none;}
+.leadbox{margin-top:12px;}
+.leadbox .lead{margin:0;}
+.leadkey{margin:8px 0 0;background:#fff7e6;border:1px solid #ffd98a;border-radius:10px;padding:8px 12px;font-family:"Kosugi Maru";font-size:.86rem;color:#7a5b00;}
+.leadkey strong{color:var(--coral-deep);}
+/* flick only — sizes scale to the window width via container queries */
+#flickWrap{container-type:inline-size;}
+.flick{display:grid;grid-template-columns:repeat(3,1fr);gap:4.5cqw 4.5cqw;}
+.fkey{position:relative;border:1px solid #c7e4e7;background:#fff;border-radius:9px;aspect-ratio:1.25/1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+  font-family:"Mochiy Pop One";font-weight:400;font-size:clamp(.6rem,11cqw,1.3rem);color:var(--ink);text-align:center;touch-action:none;user-select:none;transition:background .08s;}
+.fkey .sub{display:block;font-family:"Noto Sans JP";font-size:clamp(.32rem,3.9cqw,.54rem);color:#8aa9b0;margin-top:1px;letter-spacing:.02em;line-height:1;}
+.fkey:active,.fkey.pressing{background:#e6f6f8;}
+.fkey.func{font-size:clamp(.5rem,6.5cqw,.92rem);font-family:"Kosugi Maru";color:var(--sea);}
+.flickrow{display:grid;grid-template-columns:1fr 1fr;gap:4.5cqw;margin-top:4.5cqw;}
+.flickrow .fkey{aspect-ratio:auto;padding:3.5cqw 0;font-size:clamp(.55rem,6cqw,.92rem);font-family:"Kosugi Maru";color:var(--coral-deep);}
+/* flick guide */
+#guide{position:fixed;z-index:90;pointer-events:none;display:none;width:150px;height:150px;}
+#guide.show{display:block;}
+.gpad{position:absolute;width:46px;height:42px;display:flex;align-items:center;justify-content:center;border-radius:9px;
+  background:#0e5e76;color:#fff;font-family:"Mochiy Pop One";font-size:1.2rem;box-shadow:0 6px 14px -4px rgba(0,0,0,.4);}
+.gpad.c{left:52px;top:54px;}
+.gpad.u{left:52px;top:6px;}
+.gpad.d{left:52px;top:102px;}
+.gpad.l{left:4px;top:54px;}
+.gpad.r{left:100px;top:54px;}
+.gpad.active{background:var(--coral);transform:scale(1.12);}
+.gpad.empty{display:none;}
+
+/* win overlay */
+.overlay{position:fixed;inset:0;background:rgba(6,30,40,.58);display:none;align-items:center;justify-content:center;padding:20px;z-index:200;backdrop-filter:blur(3px);}
+.overlay.show{display:flex;animation:fd .25s;}
+@keyframes fd{from{opacity:0}to{opacity:1}}
+.card{background:linear-gradient(165deg,#fff,#eef9f9);border-radius:20px;padding:28px 24px;max-width:460px;text-align:center;box-shadow:0 30px 60px -20px rgba(6,30,40,.6);position:relative;overflow:hidden;}
+.card h3{font-family:"Mochiy Pop One";font-weight:400;color:var(--sea);margin:6px 0 2px;font-size:1.15rem;}
+.reveal{font-family:"Mochiy Pop One";font-size:1.7rem;color:var(--coral-deep);letter-spacing:.03em;margin:8px 0 2px;}
+.card .sub{font-family:"Mochiy Pop One";color:var(--sea-deep);font-size:1.02rem;margin:0 0 8px;}
+.card p{font-family:"Kosugi Maru";color:#33606d;margin:4px 0 16px;font-size:.9rem;}
+.bubbles span{position:absolute;bottom:-20px;border-radius:50%;background:rgba(95,184,201,.3);animation:rise linear infinite;}
+@keyframes rise{to{transform:translateY(-520px);opacity:0;}}
+.foot{text-align:center;margin-top:20px;color:#79a3ab;font-size:.74rem;font-family:"Kosugi Maru";}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="index.html" class="homelink">← トップ（難易度をえらぶ）</a>
+    <p class="eyebrow">いきものの ひみつを 読みとく</p>
+    <h1>海のいきもの <span class="ac">超大型クロスワード</span> <span class="grade">高校生編 ②</span></h1>
+  </header>
+
+  <div class="statusbar">
+    <div class="curclue" id="curclue"><span class="cdir">ヨコ</span><span class="ctxt">マスをタップして始めよう</span></div>
+    <div class="zoomctl" id="zoomctl">
+      <span class="zcap">ズーム</span>
+      <button id="zoomOut" title="縮小" aria-label="縮小">−</button>
+      <span class="zlbl" id="zoomLbl" title="リセット">100%</span>
+      <button id="zoomIn" title="拡大" aria-label="拡大">＋</button>
+    </div>
+    <div class="progress">
+      <div class="pbar"><i id="pfill"></i></div>
+      <span class="pct" id="pct">回答 0 / 0（0%）</span>
+    </div>
+  </div>
+
+  <div class="gridcard">
+    <div class="scroll" id="scroll">
+      <div class="grid" id="grid"><input id="entry" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="文字入力"></div>
+    </div>
+  </div>
+
+  <div class="collect">
+    <p class="clabel">あつめた もじ（①→…）</p>
+    <div class="slots" id="slots"></div>
+  </div>
+
+  <div class="toolbar">
+    <button class="tbtn ghost on" id="t-clues">📖 問題</button>
+    <button class="tbtn ghost on" id="t-kb">⌨️ キーボード</button>
+    <button class="tbtn primary" id="check">こたえあわせ</button>
+    <button class="tbtn ghost" id="reset">さいしょから</button>
+    <button class="tbtn win" id="staff">こたえを見る</button>
+    <span class="savestate" id="saveState">じどう保存</span>
+  </div>
+
+  <div class="leadbox">
+    <p class="lead">高校生物レベルの専門用語を中心にした問題です。42×42・全105問。
+      <strong>正しくうめると、キーワードのマスが金色に浮かびます。</strong>番号順に読むと言葉が現れます。</p>
+    <p class="leadkey">🔑 完成した<strong>キーワード</strong>は、<strong>次のステージに進むため</strong>に必要です。クリアしたら入力してね。</p>
+  </div>
+  <p class="msg" id="msg"></p>
+  <p class="hint">マスや問題をタップすると単語が光ります。ローマ字でそのまま入力できます（A→ア、KA→カ）。とちゅうでやめても自動で保存されます。</p>
+  <p class="foot">海のいきもの クロスワード ・ 42×42／全105問</p>
+</div>
+
+<!-- 問題ウィンドウ -->
+<div class="fwin show" id="cluesWin">
+  <div class="fbar" id="cluesBar">
+    <span class="ftitle">📖 問題</span>
+    <div class="fbtns"><button id="cluesMin" title="たたむ">—</button><button id="cluesClose" title="閉じる">✕</button></div>
+  </div>
+  <div class="fbody clues">
+    <div class="cluesearch"><input id="clueFilter" placeholder="語をしぼりこむ（例：シンカイ）"></div>
+    <h2><span class="pin">ヨコ</span>よこのカギ</h2>
+    <ul class="cluelist" id="across"></ul>
+    <h2><span class="pin">タテ</span>たてのカギ</h2>
+    <ul class="cluelist" id="down"></ul>
+  </div>
+  <div class="fresize" id="cluesResize"></div>
+</div>
+
+<!-- キーボードウィンドウ -->
+<div class="fwin show" id="kbWin">
+  <div class="fbar" id="kbBar">
+    <span class="ftitle">⌨️ キーボード</span>
+    <div class="fbtns"><button id="kbMin" title="たたむ">—</button><button id="kbClose" title="閉じる">✕</button></div>
+  </div>
+  <div class="fbody">
+    <div id="flickWrap">
+      <div class="flick" id="flick"></div>
+      <div class="flickrow" id="flickFns"></div>
+    </div>
+  </div>
+  <div class="fresize" id="kbResize"></div>
+</div>
+
+<div class="imewarn" id="imeWarn">
+  <span>日本語入力（かな）がオンのようです。すぐに文字を出すには <b>半角英数（A）</b> に切り替えてください。<br>Windows：<b>半角/全角</b>キー ／ Mac：<b>英数</b>キー。（画面のキーボードでも入力できます）</span>
+  <button id="imeClose" title="閉じる">✕</button>
+</div>
+
+<div id="guide">
+  <div class="gpad u"></div><div class="gpad l"></div><div class="gpad c"></div><div class="gpad r"></div><div class="gpad d"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="card">
+    <div class="bubbles" id="bubbles"></div>
+    <div style="font-size:1.9rem">🐬🦈🐟🌊</div>
+    <h3 id="winHead">全105問クリア！おめでとう</h3>
+    <div id="kwGate">
+      <p class="kwask">ぜんぶ うまった！ あつめた文字（キーワード）は…</p>
+      <div class="kwcollect" id="kwCollect">テキオウホウサン</div>
+      <p class="kwask2">これを入力すると <b>次のステージが開きます</b>。<br>（ローマ字でも かなでも OK）</p>
+      <div class="kwinrow">
+        <input id="kwInput" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="キーワードを入力">
+        <button class="tbtn primary" id="kwSubmit">決定</button>
+      </div>
+      <p class="kwmsg" id="kwMsg"></p>
+    </div>
+    <div id="kwDone" style="display:none">
+      <div class="reveal" id="revealWord">テキオウホウサン</div>
+      <div class="sub">＝ 適応放散（てきおうほうさん）</div>
+      <p>一つの祖先がさまざまな環境へ分かれて多様化する進化です。</p>
+      <p class="unlocked" id="unlockMsg">🎉 次のステージが解放されました！</p>
+      <div class="winbtns">
+        <button class="tbtn primary" id="again">もういちど</button>
+        <a class="tbtn ghost homeb" href="index.html">← トップへ</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"rows": 42, "cols": 42, "cells": [{"r": 0, "c": 37, "ch": "カ", "num": 1, "key": null}, {"r": 0, "c": 38, "ch": "セ", "num": null, "key": null}, {"r": 0, "c": 39, "ch": "キ", "num": null, "key": null}, {"r": 0, "c": 41, "ch": "エ", "num": 2, "key": null}, {"r": 1, "c": 29, "ch": "セ", "num": 3, "key": null}, {"r": 1, "c": 30, "ch": "イ", "num": null, "key": null}, {"r": 1, "c": 31, "ch": "ブ", "num": null, "key": null}, {"r": 1, "c": 32, "ch": "ツ", "num": null, "key": null}, {"r": 1, "c": 33, "ch": "ノ", "num": 4, "key": null}, {"r": 1, "c": 34, "ch": "ウ", "num": null, "key": null}, {"r": 1, "c": 35, "ch": "シ", "num": null, "key": null}, {"r": 1, "c": 36, "ch": "ュ", "num": null, "key": null}, {"r": 1, "c": 37, "ch": "ク", "num": null, "key": null}, {"r": 1, "c": 41, "ch": "ネ", "num": null, "key": null}, {"r": 2, "c": 33, "ch": "コ", "num": null, "key": null}, {"r": 2, "c": 37, "ch": "マ", "num": null, "key": null}, {"r": 2, "c": 41, "ch": "ル", "num": null, "key": null}, {"r": 3, "c": 29, "ch": "ホ", "num": 5, "key": null}, {"r": 3, "c": 30, "ch": "ゴ", "num": 6, "key": null}, {"r": 3, "c": 31, "ch": "ク", "num": null, "key": null}, {"r": 3, "c": 33, "ch": "ギ", "num": null, "key": null}, {"r": 3, "c": 35, "ch": "テ", "num": 7, "key": 1}, {"r": 3, "c": 37, "ch": "ク", "num": null, "key": null}, {"r": 3, "c": 41, "ch": "ギ", "num": null, "key": null}, {"r": 4, "c": 30, "ch": "ル", "num": null, "key": null}, {"r": 4, "c": 33, "ch": "リ", "num": null, "key": null}, {"r": 4, "c": 35, "ch": "ロ", "num": null, "key": null}, {"r": 4, "c": 41, "ch": "ー", "num": null, "key": null}, {"r": 5, "c": 30, "ch": "ジ", "num": 8, "key": null}, {"r": 5, "c": 31, "ch": "ン", "num": null, "key": null}, {"r": 5, "c": 32, "ch": "ベ", "num": null, "key": null}, {"r": 5, "c": 33, "ch": "エ", "num": null, "key": null}, {"r": 5, "c": 34, "ch": "ザ", "num": null, "key": null}, {"r": 5, "c": 35, "ch": "メ", "num": null, "key": null}, {"r": 5, "c": 39, "ch": "ワ", "num": 9, "key": null}, {"r": 5, "c": 41, "ch": "コ", "num": null, "key": null}, {"r": 6, "c": 30, "ch": "タ", "num": null, "key": null}, {"r": 6, "c": 33, "ch": "イ", "num": null, "key": null}, {"r": 6, "c": 35, "ch": "ア", "num": 10, "key": null}, {"r": 6, "c": 36, "ch": "カ", "num": 11, "key": null}, {"r": 6, "c": 37, "ch": "ケ", "num": null, "key": null}, {"r": 6, "c": 38, "ch": "ッ", "num": null, "key": null}, {"r": 6, "c": 39, "ch": "キ", "num": null, "key": 2}, {"r": 6, "c": 40, "ch": "ュ", "num": null, "key": null}, {"r": 6, "c": 41, "ch": "ウ", "num": null, "key": 4}, {"r": 7, "c": 27, "ch": "セ", "num": 12, "key": null}, {"r": 7, "c": 28, "ch": "キ", "num": 13, "key": null}, {"r": 7, "c": 29, "ch": "ズ", "num": null, "key": null}, {"r": 7, "c": 30, "ch": "イ", "num": null, "key": null}, {"r": 7, "c": 36, "ch": "ク", "num": null, "key": null}, {"r": 7, "c": 39, "ch": "ア", "num": null, "key": null}, {"r": 7, "c": 41, "ch": "リ", "num": null, "key": null}, {"r": 8, "c": 24, "ch": "プ", "num": 14, "key": null}, {"r": 8, "c": 28, "ch": "ョ", "num": null, "key": null}, {"r": 8, "c": 36, "ch": "シ", "num": null, "key": null}, {"r": 8, "c": 39, "ch": "ガ", "num": null, "key": null}, {"r": 8, "c": 41, "ch": "ツ", "num": null, "key": null}, {"r": 9, "c": 24, "ch": "ラ", "num": null, "key": null}, {"r": 9, "c": 26, "ch": "シ", "num": 15, "key": null}, {"r": 9, "c": 28, "ch": "ウ", "num": null, "key": null}, {"r": 9, "c": 32, "ch": "カ", "num": 16, "key": null}, {"r": 9, "c": 34, "ch": "ヒ", "num": 17, "key": null}, {"r": 9, "c": 36, "ch": "ョ", "num": null, "key": null}, {"r": 9, "c": 39, "ch": "リ", "num": null, "key": null}, {"r": 10, "c": 6, "ch": "レ", "num": 18, "key": null}, {"r": 10, "c": 23, "ch": "セ", "num": 19, "key": null}, {"r": 10, "c": 24, "ch": "ン", "num": null, "key": 8}, {"r": 10, "c": 25, "ch": "シ", "num": null, "key": null}, {"r": 10, "c": 26, "ch": "ョ", "num": null, "key": null}, {"r": 10, "c": 27, "ch": "ク", "num": null, "key": null}, {"r": 10, "c": 28, "ch": "シ", "num": null, "key": null}, {"r": 10, "c": 29, "ch": "ュ", "num": null, "key": null}, {"r": 10, "c": 31, "ch": "ベ", "num": 20, "key": null}, {"r": 10, "c": 32, "ch": "ン", "num": null, "key": null}, {"r": 10, "c": 33, "ch": "ト", "num": null, "key": null}, {"r": 10, "c": 34, "ch": "ス", "num": null, "key": null}, {"r": 10, "c": 36, "ch": "ウ", "num": null, "key": null}, {"r": 11, "c": 5, "ch": "カ", "num": 21, "key": null}, {"r": 11, "c": 6, "ch": "イ", "num": null, "key": null}, {"r": 11, "c": 7, "ch": "ア", "num": null, "key": null}, {"r": 11, "c": 8, "ch": "シ", "num": null, "key": null}, {"r": 11, "c": 24, "ch": "ク", "num": null, "key": null}, {"r": 11, "c": 26, "ch": "ク", "num": null, "key": null}, {"r": 11, "c": 28, "ch": "ン", "num": null, "key": null}, {"r": 11, "c": 32, "ch": "ゾ", "num": null, "key": null}, {"r": 11, "c": 34, "ch": "ト", "num": null, "key": null}, {"r": 11, "c": 36, "ch": "タ", "num": null, "key": null}, {"r": 11, "c": 39, "ch": "ダ", "num": 22, "key": null}, {"r": 12, "c": 6, "ch": "ス", "num": null, "key": null}, {"r": 12, "c": 24, "ch": "ト", "num": null, "key": null}, {"r": 12, "c": 26, "ch": "モ", "num": null, "key": null}, {"r": 12, "c": 28, "ch": "カ", "num": 23, "key": null}, {"r": 12, "c": 29, "ch": "イ", "num": 24, "key": null}, {"r": 12, "c": 30, "ch": "リ", "num": null, "key": null}, {"r": 12, "c": 31, "ch": "ュ", "num": null, "key": null}, {"r": 12, "c": 32, "ch": "ウ", "num": null, "key": 6}, {"r": 12, "c": 34, "ch": "ン", "num": null, "key": null}, {"r": 12, "c": 36, "ch": "イ", "num": 25, "key": null}, {"r": 12, "c": 37, "ch": "モ", "num": null, "key": null}, {"r": 12, "c": 38, "ch": "ガ", "num": null, "key": null}, {"r": 12, "c": 39, "ch": "イ", "num": null, "key": null}, {"r": 13, "c": 5, "ch": "カ", "num": 26, "key": null}, {"r": 13, "c": 6, "ch": "イ", "num": null, "key": null}, {"r": 13, "c": 7, "ch": "コ", "num": null, "key": null}, {"r": 13, "c": 8, "ch": "ウ", "num": null, "key": null}, {"r": 13, "c": 14, "ch": "ア", "num": 27, "key": null}, {"r": 13, "c": 15, "ch": "サ", "num": null, "key": null}, {"r": 13, "c": 16, "ch": "リ", "num": 28, "key": null}, {"r": 13, "c": 20, "ch": "ユ", "num": 29, "key": null}, {"r": 13, "c": 21, "ch": "ウ", "num": 30, "key": null}, {"r": 13, "c": 22, "ch": "シ", "num": null, "key": null}, {"r": 13, "c": 23, "ch": "ブ", "num": null, "key": null}, {"r": 13, "c": 24, "ch": "ン", "num": null, "key": null}, {"r": 13, "c": 25, "ch": "レ", "num": null, "key": null}, {"r": 13, "c": 26, "ch": "ツ", "num": null, "key": null}, {"r": 13, "c": 29, "ch": "ソ", "num": null, "key": null}, {"r": 13, "c": 39, "ch": "オ", "num": null, "key": null}, {"r": 13, "c": 41, "ch": "ス", "num": 31, "key": null}, {"r": 14, "c": 6, "ch": "ユ", "num": null, "key": null}, {"r": 14, "c": 16, "ch": "ュ", "num": null, "key": null}, {"r": 14, "c": 18, "ch": "ヘ", "num": 32, "key": null}, {"r": 14, "c": 21, "ch": "ロ", "num": null, "key": null}, {"r": 14, "c": 26, "ch": "モ", "num": 33, "key": null}, {"r": 14, "c": 27, "ch": "バ", "num": null, "key": null}, {"r": 14, "c": 29, "ch": "ギ", "num": null, "key": null}, {"r": 14, "c": 31, "ch": "セ", "num": 34, "key": null}, {"r": 14, "c": 36, "ch": "ホ", "num": 35, "key": null}, {"r": 14, "c": 37, "ch": "ニ", "num": 36, "key": null}, {"r": 14, "c": 38, "ch": "ュ", "num": null, "key": null}, {"r": 14, "c": 39, "ch": "ウ", "num": null, "key": null}, {"r": 14, "c": 40, "ch": "ル", "num": null, "key": null}, {"r": 14, "c": 41, "ch": "イ", "num": null, "key": null}, {"r": 15, "c": 6, "ch": "ウ", "num": null, "key": null}, {"r": 15, "c": 14, "ch": "チ", "num": 37, "key": null}, {"r": 15, "c": 15, "ch": "ョ", "num": null, "key": null}, {"r": 15, "c": 16, "ch": "ウ", "num": null, "key": null}, {"r": 15, "c": 17, "ch": "チ", "num": null, "key": null}, {"r": 15, "c": 18, "ch": "ン", "num": null, "key": null}, {"r": 15, "c": 19, "ch": "ア", "num": null, "key": null}, {"r": 15, "c": 20, "ch": "ン", "num": null, "key": null}, {"r": 15, "c": 21, "ch": "コ", "num": null, "key": null}, {"r": 15, "c": 22, "ch": "ウ", "num": 38, "key": null}, {"r": 15, "c": 26, "ch": "ウ", "num": null, "key": null}, {"r": 15, "c": 28, "ch": "エ", "num": 39, "key": null}, {"r": 15, "c": 29, "ch": "ン", "num": null, "key": null}, {"r": 15, "c": 30, "ch": "ブ", "num": null, "key": null}, {"r": 15, "c": 31, "ch": "ン", "num": null, "key": null}, {"r": 15, "c": 37, "ch": "マ", "num": null, "key": null}, {"r": 15, "c": 39, "ch": "グ", "num": null, "key": null}, {"r": 15, "c": 41, "ch": "ア", "num": null, "key": null}, {"r": 16, "c": 4, "ch": "ケ", "num": 40, "key": null}, {"r": 16, "c": 5, "ch": "ッ", "num": null, "key": null}, {"r": 16, "c": 6, "ch": "シ", "num": null, "key": null}, {"r": 16, "c": 7, "ch": "ョ", "num": null, "key": null}, {"r": 16, "c": 8, "ch": "ウ", "num": null, "key": null}, {"r": 16, "c": 9, "ch": "バ", "num": null, "key": null}, {"r": 16, "c": 10, "ch": "ン", "num": null, "key": null}, {"r": 16, "c": 16, "ch": "グ", "num": null, "key": null}, {"r": 16, "c": 18, "ch": "イ", "num": null, "key": null}, {"r": 16, "c": 22, "ch": "ツ", "num": null, "key": null}, {"r": 16, "c": 29, "ch": "ポ", "num": null, "key": null}, {"r": 16, "c": 31, "ch": "シ", "num": 41, "key": null}, {"r": 16, "c": 32, "ch": "ト", "num": null, "key": null}, {"r": 16, "c": 33, "ch": "シ", "num": null, "key": null}, {"r": 16, "c": 34, "ch": "ン", "num": null, "key": null}, {"r": 16, "c": 37, "ch": "イ", "num": null, "key": null}, {"r": 16, "c": 39, "ch": "ソ", "num": null, "key": null}, {"r": 16, "c": 41, "ch": "ツ", "num": null, "key": null}, {"r": 17, "c": 6, "ch": "ュ", "num": null, "key": null}, {"r": 17, "c": 11, "ch": "ワ", "num": 42, "key": null}, {"r": 17, "c": 14, "ch": "シ", "num": 43, "key": null}, {"r": 17, "c": 15, "ch": "ホ", "num": null, "key": null}, {"r": 17, "c": 16, "ch": "ウ", "num": null, "key": null}, {"r": 17, "c": 22, "ch": "ボ", "num": null, "key": null}, {"r": 17, "c": 31, "ch": "ョ", "num": null, "key": null}, {"r": 17, "c": 37, "ch": "ガ", "num": null, "key": null}, {"r": 17, "c": 39, "ch": "ク", "num": null, "key": null}, {"r": 18, "c": 0, "ch": "デ", "num": 44, "key": null}, {"r": 18, "c": 1, "ch": "ン", "num": null, "key": null}, {"r": 18, "c": 2, "ch": "シ", "num": 45, "key": null}, {"r": 18, "c": 3, "ch": "デ", "num": null, "key": null}, {"r": 18, "c": 4, "ch": "ン", "num": null, "key": null}, {"r": 18, "c": 5, "ch": "タ", "num": 46, "key": null}, {"r": 18, "c": 6, "ch": "ツ", "num": null, "key": null}, {"r": 18, "c": 7, "ch": "ケ", "num": null, "key": null}, {"r": 18, "c": 8, "ch": "イ", "num": 47, "key": null}, {"r": 18, "c": 11, "ch": "カ", "num": 48, "key": null}, {"r": 18, "c": 12, "ch": "イ", "num": null, "key": null}, {"r": 18, "c": 13, "ch": "レ", "num": null, "key": null}, {"r": 18, "c": 14, "ch": "イ", "num": null, "key": null}, {"r": 18, "c": 16, "ch": "ノ", "num": null, "key": null}, {"r": 18, "c": 31, "ch": "ク", "num": null, "key": null}, {"r": 18, "c": 37, "ch": "イ", "num": null, "key": null}, {"r": 18, "c": 39, "ch": "ム", "num": null, "key": null}, {"r": 19, "c": 2, "ch": "ロ", "num": null, "key": null}, {"r": 19, "c": 5, "ch": "イ", "num": null, "key": null}, {"r": 19, "c": 8, "ch": "デ", "num": null, "key": null}, {"r": 19, "c": 11, "ch": "メ", "num": null, "key": null}, {"r": 19, "c": 14, "ch": "ラ", "num": null, "key": null}, {"r": 19, "c": 16, "ch": "ツ", "num": null, "key": null}, {"r": 19, "c": 30, "ch": "ホ", "num": 49, "key": null}, {"r": 19, "c": 31, "ch": "タ", "num": null, "key": null}, {"r": 19, "c": 32, "ch": "テ", "num": null, "key": null}, {"r": 19, "c": 39, "ch": "シ", "num": null, "key": null}, {"r": 20, "c": 2, "ch": "ナ", "num": null, "key": null}, {"r": 20, "c": 7, "ch": "ペ", "num": 50, "key": null}, {"r": 20, "c": 8, "ch": "ン", "num": null, "key": null}, {"r": 20, "c": 9, "ch": "ギ", "num": null, "key": null}, {"r": 20, "c": 10, "ch": "ン", "num": null, "key": null}, {"r": 20, "c": 16, "ch": "カ", "num": 51, "key": null}, {"r": 20, "c": 17, "ch": "キ", "num": null, "key": null}, {"r": 20, "c": 31, "ch": "イ", "num": null, "key": null}, {"r": 21, "c": 2, "ch": "ガ", "num": null, "key": null}, {"r": 21, "c": 8, "ch": "シ", "num": null, "key": null}, {"r": 21, "c": 12, "ch": "ム", "num": 52, "key": null}, {"r": 21, "c": 13, "ch": "セ", "num": 53, "key": null}, {"r": 21, "c": 14, "ch": "キ", "num": null, "key": null}, {"r": 21, "c": 15, "ch": "ツ", "num": null, "key": null}, {"r": 21, "c": 16, "ch": "イ", "num": null, "key": null}, {"r": 21, "c": 19, "ch": "ハ", "num": 54, "key": null}, {"r": 21, "c": 20, "ch": "ッ", "num": null, "key": null}, {"r": 21, "c": 21, "ch": "カ", "num": 55, "key": null}, {"r": 22, "c": 2, "ch": "ス", "num": null, "key": null}, {"r": 22, "c": 4, "ch": "キ", "num": 56, "key": null}, {"r": 22, "c": 7, "ch": "ペ", "num": 57, "key": null}, {"r": 22, "c": 8, "ch": "プ", "num": null, "key": null}, {"r": 22, "c": 9, "ch": "チ", "num": null, "key": null}, {"r": 22, "c": 10, "ch": "ド", "num": 58, "key": null}, {"r": 22, "c": 13, "ch": "ツ", "num": null, "key": null}, {"r": 22, "c": 21, "ch": "ツ", "num": null, "key": null}, {"r": 22, "c": 23, "ch": "カ", "num": 59, "key": null}, {"r": 23, "c": 2, "ch": "ク", "num": null, "key": null}, {"r": 23, "c": 4, "ch": "セ", "num": null, "key": null}, {"r": 23, "c": 8, "ch": "ー", "num": null, "key": null}, {"r": 23, "c": 10, "ch": "ウ", "num": null, "key": null}, {"r": 23, "c": 13, "ch": "ソ", "num": 60, "key": null}, {"r": 23, "c": 14, "ch": "セ", "num": null, "key": null}, {"r": 23, "c": 15, "ch": "ン", "num": null, "key": null}, {"r": 23, "c": 20, "ch": "ア", "num": 61, "key": null}, {"r": 23, "c": 21, "ch": "オ", "num": null, "key": 3}, {"r": 23, "c": 22, "ch": "ザ", "num": null, "key": null}, {"r": 23, "c": 23, "ch": "メ", "num": null, "key": null}, {"r": 24, "c": 0, "ch": "ニ", "num": 62, "key": null}, {"r": 24, "c": 1, "ch": "チ", "num": null, "key": null}, {"r": 24, "c": 2, "ch": "ジ", "num": null, "key": null}, {"r": 24, "c": 3, "ch": "セ", "num": null, "key": null}, {"r": 24, "c": 4, "ch": "イ", "num": null, "key": null}, {"r": 24, "c": 5, "ch": "サ", "num": 63, "key": 7}, {"r": 24, "c": 6, "ch": "ン", "num": null, "key": null}, {"r": 24, "c": 8, "ch": "ル", "num": null, "key": null}, {"r": 24, "c": 10, "ch": "カ", "num": 64, "key": null}, {"r": 24, "c": 11, "ch": "ン", "num": null, "key": null}, {"r": 24, "c": 12, "ch": "ソ", "num": null, "key": null}, {"r": 24, "c": 13, "ch": "ク", "num": null, "key": null}, {"r": 24, "c": 20, "ch": "ポ", "num": null, "key": null}, {"r": 24, "c": 23, "ch": "ノ", "num": null, "key": null}, {"r": 25, "c": 0, "ch": "ッ", "num": null, "key": null}, {"r": 25, "c": 2, "ch": "ラ", "num": null, "key": null}, {"r": 25, "c": 5, "ch": "バ", "num": null, "key": null}, {"r": 25, "c": 13, "ch": "ド", "num": null, "key": null}, {"r": 25, "c": 20, "ch": "ト", "num": null, "key": null}, {"r": 25, "c": 23, "ch": "テ", "num": null, "key": null}, {"r": 26, "c": 0, "ch": "チ", "num": null, "key": null}, {"r": 26, "c": 9, "ch": "フ", "num": 65, "key": null}, {"r": 26, "c": 10, "ch": "エ", "num": null, "key": null}, {"r": 26, "c": 11, "ch": "イ", "num": null, "key": null}, {"r": 26, "c": 12, "ch": "ヨ", "num": null, "key": null}, {"r": 26, "c": 13, "ch": "ウ", "num": null, "key": null}, {"r": 26, "c": 14, "ch": "カ", "num": null, "key": null}, {"r": 26, "c": 18, "ch": "コ", "num": 66, "key": null}, {"r": 26, "c": 19, "ch": "ラ", "num": null, "key": null}, {"r": 26, "c": 20, "ch": "ー", "num": null, "key": null}, {"r": 26, "c": 21, "ch": "ゲ", "num": null, "key": null}, {"r": 26, "c": 22, "ch": "ン", "num": null, "key": null}, {"r": 27, "c": 13, "ch": "ブ", "num": null, "key": null}, {"r": 27, "c": 16, "ch": "デ", "num": 67, "key": null}, {"r": 27, "c": 18, "ch": "ド", "num": null, "key": null}, {"r": 27, "c": 20, "ch": "シ", "num": null, "key": null}, {"r": 28, "c": 3, "ch": "テ", "num": 68, "key": null}, {"r": 28, "c": 4, "ch": "ヅ", "num": null, "key": null}, {"r": 28, "c": 5, "ch": "ル", "num": 69, "key": null}, {"r": 28, "c": 6, "ch": "モ", "num": null, "key": null}, {"r": 28, "c": 7, "ch": "ヅ", "num": null, "key": null}, {"r": 28, "c": 8, "ch": "ル", "num": null, "key": null}, {"r": 28, "c": 10, "ch": "ブ", "num": 70, "key": null}, {"r": 28, "c": 11, "ch": "ッ", "num": null, "key": null}, {"r": 28, "c": 12, "ch": "シ", "num": 71, "key": null}, {"r": 28, "c": 13, "ch": "ツ", "num": null, "key": null}, {"r": 28, "c": 14, "ch": "ジ", "num": null, "key": null}, {"r": 28, "c": 15, "ch": "ュ", "num": null, "key": null}, {"r": 28, "c": 16, "ch": "ン", "num": null, "key": null}, {"r": 28, "c": 17, "ch": "カ", "num": null, "key": null}, {"r": 28, "c": 18, "ch": "ン", "num": null, "key": null}, {"r": 28, "c": 20, "ch": "ス", "num": null, "key": null}, {"r": 29, "c": 5, "ch": "シ", "num": null, "key": null}, {"r": 29, "c": 10, "ch": "ダ", "num": null, "key": null}, {"r": 29, "c": 12, "ch": "オ", "num": null, "key": null}, {"r": 29, "c": 16, "ch": "シ", "num": null, "key": null}, {"r": 29, "c": 23, "ch": "ス", "num": 72, "key": null}, {"r": 29, "c": 27, "ch": "ケ", "num": 73, "key": null}, {"r": 30, "c": 5, "ch": "フ", "num": 74, "key": null}, {"r": 30, "c": 6, "ch": "ク", "num": null, "key": null}, {"r": 30, "c": 7, "ch": "ソ", "num": 75, "key": null}, {"r": 30, "c": 8, "ch": "ク", "num": null, "key": null}, {"r": 30, "c": 9, "ch": "ル", "num": null, "key": null}, {"r": 30, "c": 10, "ch": "イ", "num": null, "key": null}, {"r": 30, "c": 12, "ch": "ダ", "num": null, "key": null}, {"r": 30, "c": 16, "ch": "ケ", "num": 76, "key": null}, {"r": 30, "c": 17, "ch": "ン", "num": null, "key": null}, {"r": 30, "c": 18, "ch": "ビ", "num": null, "key": null}, {"r": 30, "c": 19, "ch": "キ", "num": null, "key": null}, {"r": 30, "c": 20, "ch": "ョ", "num": null, "key": null}, {"r": 30, "c": 21, "ch": "ウ", "num": 77, "key": null}, {"r": 30, "c": 23, "ch": "プ", "num": null, "key": null}, {"r": 30, "c": 26, "ch": "エ", "num": 78, "key": null}, {"r": 30, "c": 27, "ch": "ラ", "num": null, "key": null}, {"r": 31, "c": 5, "ch": "ェ", "num": null, "key": null}, {"r": 31, "c": 7, "ch": "ク", "num": null, "key": null}, {"r": 31, "c": 12, "ch": "マ", "num": null, "key": null}, {"r": 31, "c": 16, "ch": "ン", "num": null, "key": null}, {"r": 31, "c": 21, "ch": "ミ", "num": null, "key": null}, {"r": 31, "c": 23, "ch": "ラ", "num": null, "key": null}, {"r": 31, "c": 27, "ch": "チ", "num": null, "key": null}, {"r": 32, "c": 5, "ch": "リ", "num": null, "key": null}, {"r": 32, "c": 7, "ch": "セ", "num": null, "key": null}, {"r": 32, "c": 10, "ch": "ハ", "num": 79, "key": null}, {"r": 32, "c": 11, "ch": "オ", "num": 80, "key": null}, {"r": 32, "c": 12, "ch": "リ", "num": null, "key": null}, {"r": 32, "c": 13, "ch": "ム", "num": null, "key": null}, {"r": 32, "c": 14, "ch": "シ", "num": 81, "key": null}, {"r": 32, "c": 16, "ch": "ビ", "num": null, "key": null}, {"r": 32, "c": 18, "ch": "ゲ", "num": 82, "key": null}, {"r": 32, "c": 20, "ch": "モ", "num": 83, "key": null}, {"r": 32, "c": 21, "ch": "ウ", "num": null, "key": null}, {"r": 32, "c": 22, "ch": "サ", "num": null, "key": null}, {"r": 32, "c": 23, "ch": "イ", "num": null, "key": null}, {"r": 32, "c": 24, "ch": "ケ", "num": null, "key": null}, {"r": 32, "c": 25, "ch": "ッ", "num": null, "key": null}, {"r": 32, "c": 26, "ch": "カ", "num": 84, "key": null}, {"r": 32, "c": 27, "ch": "ン", "num": null, "key": null}, {"r": 33, "c": 5, "ch": "ン", "num": null, "key": null}, {"r": 33, "c": 7, "ch": "ン", "num": null, "key": null}, {"r": 33, "c": 11, "ch": "キ", "num": null, "key": null}, {"r": 33, "c": 14, "ch": "オ", "num": null, "key": null}, {"r": 33, "c": 16, "ch": "キ", "num": null, "key": null}, {"r": 33, "c": 18, "ch": "ン", "num": null, "key": null}, {"r": 33, "c": 21, "ch": "シ", "num": null, "key": null}, {"r": 33, "c": 23, "ch": "シ", "num": null, "key": null}, {"r": 33, "c": 26, "ch": "ク", "num": null, "key": null}, {"r": 34, "c": 11, "ch": "ア", "num": null, "key": null}, {"r": 34, "c": 14, "ch": "メ", "num": null, "key": null}, {"r": 34, "c": 16, "ch": "ョ", "num": null, "key": null}, {"r": 34, "c": 18, "ch": "サ", "num": 85, "key": null}, {"r": 34, "c": 19, "ch": "ザ", "num": null, "key": null}, {"r": 34, "c": 20, "ch": "エ", "num": 86, "key": null}, {"r": 34, "c": 23, "ch": "ン", "num": null, "key": null}, {"r": 34, "c": 26, "ch": "ラ", "num": 87, "key": null}, {"r": 34, "c": 27, "ch": "ブ", "num": null, "key": null}, {"r": 34, "c": 28, "ch": "カ", "num": null, "key": null}, {"r": 35, "c": 10, "ch": "チ", "num": 88, "key": null}, {"r": 35, "c": 11, "ch": "ミ", "num": null, "key": null}, {"r": 35, "c": 12, "ch": "ン", "num": null, "key": null}, {"r": 35, "c": 15, "ch": "ホ", "num": 89, "key": 5}, {"r": 35, "c": 16, "ch": "ウ", "num": null, "key": null}, {"r": 35, "c": 17, "ch": "フ", "num": null, "key": null}, {"r": 35, "c": 18, "ch": "ク", "num": null, "key": null}, {"r": 35, "c": 20, "ch": "ン", "num": null, "key": null}, {"r": 35, "c": 23, "ch": "グ", "num": null, "key": null}, {"r": 35, "c": 26, "ch": "ン", "num": null, "key": null}, {"r": 36, "c": 15, "ch": "ホ", "num": null, "key": null}, {"r": 36, "c": 18, "ch": "ド", "num": null, "key": null}, {"r": 36, "c": 20, "ch": "ル", "num": null, "key": null}, {"r": 36, "c": 25, "ch": "ヤ", "num": 90, "key": null}, {"r": 36, "c": 26, "ch": "ド", "num": null, "key": null}, {"r": 36, "c": 27, "ch": "カ", "num": 91, "key": null}, {"r": 36, "c": 28, "ch": "リ", "num": null, "key": null}, {"r": 37, "c": 12, "ch": "ド", "num": 92, "key": null}, {"r": 37, "c": 13, "ch": "レ", "num": null, "key": null}, {"r": 37, "c": 14, "ch": "ッ", "num": null, "key": null}, {"r": 37, "c": 15, "ch": "ジ", "num": null, "key": null}, {"r": 37, "c": 18, "ch": "ウ", "num": null, "key": null}, {"r": 37, "c": 20, "ch": "イ", "num": 93, "key": null}, {"r": 37, "c": 21, "ch": "デ", "num": null, "key": null}, {"r": 37, "c": 22, "ch": "ン", "num": null, "key": null}, {"r": 37, "c": 23, "ch": "シ", "num": 94, "key": null}, {"r": 37, "c": 27, "ch": "ン", "num": null, "key": null}, {"r": 37, "c": 29, "ch": "ゴ", "num": 95, "key": null}, {"r": 38, "c": 15, "ch": "ロ", "num": null, "key": null}, {"r": 38, "c": 18, "ch": "ブ", "num": null, "key": null}, {"r": 38, "c": 20, "ch": "セ", "num": null, "key": null}, {"r": 38, "c": 23, "ch": "ラ", "num": null, "key": null}, {"r": 38, "c": 27, "ch": "サ", "num": null, "key": null}, {"r": 38, "c": 29, "ch": "カ", "num": null, "key": null}, {"r": 39, "c": 15, "ch": "ザ", "num": null, "key": null}, {"r": 39, "c": 18, "ch": "ツ", "num": null, "key": null}, {"r": 39, "c": 20, "ch": "ン", "num": null, "key": null}, {"r": 39, "c": 23, "ch": "ス", "num": null, "key": null}, {"r": 39, "c": 26, "ch": "テ", "num": 96, "key": null}, {"r": 39, "c": 27, "ch": "イ", "num": null, "key": null}, {"r": 39, "c": 28, "ch": "セ", "num": null, "key": null}, {"r": 39, "c": 29, "ch": "イ", "num": null, "key": null}, {"r": 39, "c": 30, "ch": "ギ", "num": null, "key": null}, {"r": 39, "c": 31, "ch": "ョ", "num": null, "key": null}, {"r": 40, "c": 13, "ch": "ゼ", "num": 97, "key": null}, {"r": 40, "c": 14, "ch": "ツ", "num": null, "key": null}, {"r": 40, "c": 15, "ch": "メ", "num": null, "key": null}, {"r": 40, "c": 16, "ch": "ツ", "num": null, "key": null}, {"r": 40, "c": 27, "ch": "ボ", "num": null, "key": null}, {"r": 41, "c": 22, "ch": "セ", "num": 98, "key": null}, {"r": 41, "c": 23, "ch": "キ", "num": null, "key": null}, {"r": 41, "c": 24, "ch": "ツ", "num": null, "key": null}, {"r": 41, "c": 25, "ch": "イ", "num": null, "key": null}, {"r": 41, "c": 26, "ch": "ド", "num": null, "key": null}, {"r": 41, "c": 27, "ch": "ウ", "num": null, "key": null}, {"r": 41, "c": 28, "ch": "ブ", "num": null, "key": null}, {"r": 41, "c": 29, "ch": "ツ", "num": null, "key": null}], "across": [{"num": 1, "clue": "地層に残る生物の痕跡", "answer": "カセキ", "r": 0, "c": 37, "dir": "H", "length": 3}, {"num": 3, "clue": "有害物質が高次へ蓄積する現象", "answer": "セイブツノウシュク", "r": 1, "c": 29, "dir": "H", "length": 9}, {"num": 5, "clue": "生物を守るために設けた区域", "answer": "ホゴク", "r": 3, "c": 29, "dir": "H", "length": 3}, {"num": 8, "clue": "世界最大の魚", "answer": "ジンベエザメ", "r": 5, "c": 30, "dir": "H", "length": 6}, {"num": 10, "clue": "酸素を運ぶ血液の細胞", "answer": "アカケッキュウ", "r": 6, "c": 35, "dir": "H", "length": 7}, {"num": 12, "clue": "背骨を通る中枢神経", "answer": "セキズイ", "r": 7, "c": 27, "dir": "H", "length": 4}, {"num": 19, "clue": "特定の環境を好む種", "answer": "センショクシュ", "r": 10, "c": 23, "dir": "H", "length": 7}, {"num": 20, "clue": "海底に生活する底生生物", "answer": "ベントス", "r": 10, "c": 31, "dir": "H", "length": 4}, {"num": 21, "clue": "海の主要な動物プランクトン", "answer": "カイアシ", "r": 11, "c": 5, "dir": "H", "length": 4}, {"num": 23, "clue": "海中の大きな水の流れ", "answer": "カイリュウ", "r": 12, "c": 28, "dir": "H", "length": 5}, {"num": 25, "clue": "毒銛を持つ巻貝", "answer": "イモガイ", "r": 12, "c": 36, "dir": "H", "length": 4}, {"num": 26, "clue": "沈み込みでできる深い溝", "answer": "カイコウ", "r": 13, "c": 5, "dir": "H", "length": 4}, {"num": 27, "clue": "砂にすむ二枚貝", "answer": "アサリ", "r": 13, "c": 14, "dir": "H", "length": 3}, {"num": 29, "clue": "染色体が分かれる体細胞分裂", "answer": "ユウシブンレツ", "r": 13, "c": 20, "dir": "H", "length": 7}, {"num": 33, "clue": "アマモが茂るゆりかご", "answer": "モバ", "r": 14, "c": 26, "dir": "H", "length": 2}, {"num": 35, "clue": "乳で子を育てる脊椎動物", "answer": "ホニュウルイ", "r": 14, "c": 36, "dir": "H", "length": 6}, {"num": 37, "clue": "発光器で獲物をさそう深海魚", "answer": "チョウチンアンコウ", "r": 15, "c": 14, "dir": "H", "length": 9}, {"num": 39, "clue": "海水の塩のこさ", "answer": "エンブン", "r": 15, "c": 28, "dir": "H", "length": 4}, {"num": 40, "clue": "血を固める血液の成分", "answer": "ケッショウバン", "r": 16, "c": 4, "dir": "H", "length": 7}, {"num": 41, "clue": "DNAの塩基Cの名", "answer": "シトシン", "r": 16, "c": 31, "dir": "H", "length": 4}, {"num": 43, "clue": "クラゲがもつ毒針の細胞器官", "answer": "シホウ", "r": 17, "c": 14, "dir": "H", "length": 3}, {"num": 44, "clue": "ATPを多く作る膜の電子の流れ", "answer": "デンシデンタツケイ", "r": 18, "c": 0, "dir": "H", "length": 9}, {"num": 48, "clue": "海底にのびる火山性の山脈", "answer": "カイレイ", "r": 18, "c": 11, "dir": "H", "length": 4}, {"num": 49, "clue": "殻を開閉して泳ぐ二枚貝", "answer": "ホタテ", "r": 19, "c": 30, "dir": "H", "length": 3}, {"num": 50, "clue": "翼で水中を泳ぐ鳥", "answer": "ペンギン", "r": 20, "c": 7, "dir": "H", "length": 4}, {"num": 51, "clue": "岩に付く食用の二枚貝", "answer": "カキ", "r": 20, "c": 16, "dir": "H", "length": 2}, {"num": 52, "clue": "背骨を持たない動物の総称", "answer": "ムセキツイ", "r": 21, "c": 12, "dir": "H", "length": 5}, {"num": 54, "clue": "サンゴが共生藻を失い白くなる現象", "answer": "ハッカ", "r": 21, "c": 19, "dir": "H", "length": 3}, {"num": 57, "clue": "アミノ酸がつながった鎖", "answer": "ペプチド", "r": 22, "c": 7, "dir": "H", "length": 4}, {"num": 60, "clue": "もとになった過去の生物", "answer": "ソセン", "r": 23, "c": 13, "dir": "H", "length": 3}, {"num": 61, "clue": "高速で泳ぐサメ", "answer": "アオザメ", "r": 23, "c": 20, "dir": "H", "length": 4}, {"num": 62, "clue": "植食者などを通る二次的な生産", "answer": "ニチジセイサン", "r": 24, "c": 0, "dir": "H", "length": 7}, {"num": 64, "clue": "ウニ・ヒトデの水で動く管の足", "answer": "カンソク", "r": 24, "c": 10, "dir": "H", "length": 4}, {"num": 65, "clue": "栄養塩が増えすぎる現象", "answer": "フエイヨウカ", "r": 26, "c": 9, "dir": "H", "length": 6}, {"num": 66, "clue": "結合組織を支えるタンパク質", "answer": "コラーゲン", "r": 26, "c": 18, "dir": "H", "length": 5}, {"num": 68, "clue": "腕が枝分かれするクモヒトデ", "answer": "テヅルモヅル", "r": 28, "c": 3, "dir": "H", "length": 6}, {"num": 70, "clue": "炭素や窒素が生態系をめぐる流れ", "answer": "ブッシツジュンカン", "r": 28, "c": 10, "dir": "H", "length": 9}, {"num": 74, "clue": "巻貝など腹足ではう綱", "answer": "フクソクルイ", "r": 30, "c": 5, "dir": "H", "length": 6}, {"num": 76, "clue": "小さなものを拡大して見る器具", "answer": "ケンビキョウ", "r": 30, "c": 16, "dir": "H", "length": 6}, {"num": 78, "clue": "水中の呼吸器官", "answer": "エラ", "r": 30, "c": 26, "dir": "H", "length": 2}, {"num": 79, "clue": "共生細菌に養われる熱水域の環形動物", "answer": "ハオリムシ", "r": 32, "c": 10, "dir": "H", "length": 5}, {"num": 83, "clue": "物質交換を行う細い血管", "answer": "モウサイケッカン", "r": 32, "c": 20, "dir": "H", "length": 8}, {"num": 85, "clue": "つのを持つ食用の巻貝", "answer": "サザエ", "r": 34, "c": 18, "dir": "H", "length": 3}, {"num": 87, "clue": "原始的な姿を残すサメ", "answer": "ラブカ", "r": 34, "c": 26, "dir": "H", "length": 3}, {"num": 88, "clue": "DNAの塩基Tの名", "answer": "チミン", "r": 35, "c": 10, "dir": "H", "length": 3}, {"num": 89, "clue": "体腔の一種、血体腔", "answer": "ホウフク", "r": 35, "c": 15, "dir": "H", "length": 4}, {"num": 90, "clue": "巻貝の殻を借りる甲殻類", "answer": "ヤドカリ", "r": 36, "c": 25, "dir": "H", "length": 4}, {"num": 92, "clue": "海底の底質をさらう採集具", "answer": "ドレッジ", "r": 37, "c": 12, "dir": "H", "length": 4}, {"num": 93, "clue": "形質を伝えるDNA上の単位", "answer": "イデンシ", "r": 37, "c": 20, "dir": "H", "length": 4}, {"num": 96, "clue": "海底で暮らす魚", "answer": "テイセイギョ", "r": 39, "c": 26, "dir": "H", "length": 6}, {"num": 97, "clue": "種がすべて死に絶えること", "answer": "ゼツメツ", "r": 40, "c": 13, "dir": "H", "length": 4}, {"num": 98, "clue": "背骨を持つ動物のなかま", "answer": "セキツイドウブツ", "r": 41, "c": 22, "dir": "H", "length": 8}], "down": [{"num": 1, "clue": "核を包む膜", "answer": "カクマク", "r": 0, "c": 37, "dir": "V", "length": 4}, {"num": 2, "clue": "次の段階へ伝わる割合", "answer": "エネルギーコウリツ", "r": 0, "c": 41, "dir": "V", "length": 9}, {"num": 4, "clue": "のこぎり状の吻を持つ軟骨魚", "answer": "ノコギリエイ", "r": 1, "c": 33, "dir": "V", "length": 6}, {"num": 6, "clue": "分泌物を加工・選別する小器官", "answer": "ゴルジタイ", "r": 3, "c": 30, "dir": "V", "length": 5}, {"num": 7, "clue": "染色体末端の保護配列", "answer": "テロメア", "r": 3, "c": 35, "dir": "V", "length": 4}, {"num": 9, "clue": "深層の栄養塩が表層へ上がる流れ", "answer": "ワキアガリ", "r": 5, "c": 39, "dir": "V", "length": 5}, {"num": 11, "clue": "核内でrRNAを作る構造", "answer": "カクショウタイ", "r": 6, "c": 36, "dir": "V", "length": 7}, {"num": 13, "clue": "関わる種が互いに進化すること", "answer": "キョウシンカ", "r": 7, "c": 28, "dir": "V", "length": 6}, {"num": 14, "clue": "水中をただよう生物", "answer": "プランクトン", "r": 8, "c": 24, "dir": "V", "length": 6}, {"num": 15, "clue": "食物連鎖が網目状になった関係", "answer": "ショクモツモウ", "r": 9, "c": 26, "dir": "V", "length": 7}, {"num": 16, "clue": "解毒や代謝を担う器官", "answer": "カンゾウ", "r": 9, "c": 32, "dir": "V", "length": 4}, {"num": 17, "clue": "DNAが巻きつくタンパク質", "answer": "ヒストン", "r": 9, "c": 34, "dir": "V", "length": 4}, {"num": 18, "clue": "メタン等がしみ出す冷たい湧水域", "answer": "レイスイユウシュツ", "r": 10, "c": 6, "dir": "V", "length": 9}, {"num": 22, "clue": "深海の大型の等脚類", "answer": "ダイオウグソクムシ", "r": 11, "c": 39, "dir": "V", "length": 9}, {"num": 24, "clue": "岩場の小さな魚", "answer": "イソギンポ", "r": 12, "c": 29, "dir": "V", "length": 5}, {"num": 28, "clue": "銀色で超細長い深海魚", "answer": "リュウグウノツカイ", "r": 13, "c": 16, "dir": "V", "length": 9}, {"num": 30, "clue": "魚の体表をおおう板", "answer": "ウロコ", "r": 13, "c": 21, "dir": "V", "length": 3}, {"num": 31, "clue": "深さとともに増す水の圧力", "answer": "スイアツ", "r": 13, "c": 41, "dir": "V", "length": 4}, {"num": 32, "clue": "個体間の形質のちがい", "answer": "ヘンイ", "r": 14, "c": 18, "dir": "V", "length": 3}, {"num": 34, "clue": "遺伝子をまとめた糸状の構造", "answer": "センショクタイ", "r": 14, "c": 31, "dir": "V", "length": 7}, {"num": 36, "clue": "二枚の殻を持つ軟体動物", "answer": "ニマイガイ", "r": 14, "c": 37, "dir": "V", "length": 5}, {"num": 38, "clue": "岩穴の細長い肉食魚", "answer": "ウツボ", "r": 15, "c": 22, "dir": "V", "length": 3}, {"num": 42, "clue": "身近な海藻", "answer": "ワカメ", "r": 17, "c": 11, "dir": "V", "length": 3}, {"num": 43, "clue": "金緑色に輝く外洋の魚", "answer": "シイラ", "r": 17, "c": 14, "dir": "V", "length": 3}, {"num": 45, "clue": "地球最大の動物", "answer": "シロナガスクジラ", "r": 18, "c": 2, "dir": "V", "length": 8}, {"num": 46, "clue": "祝いに使われる赤い魚", "answer": "タイ", "r": 18, "c": 5, "dir": "V", "length": 2}, {"num": 47, "clue": "集団がもつ遺伝子の総体", "answer": "イデンシプール", "r": 18, "c": 8, "dir": "V", "length": 7}, {"num": 53, "clue": "外骨格と関節肢を持つ最大の門", "answer": "セツソクドウブツ", "r": 21, "c": 13, "dir": "V", "length": 8}, {"num": 55, "clue": "群れで回遊する魚", "answer": "カツオ", "r": 21, "c": 21, "dir": "V", "length": 3}, {"num": 56, "clue": "宿主から一方的に利益を得る関係", "answer": "キセイ", "r": 22, "c": 4, "dir": "V", "length": 3}, {"num": 58, "clue": "単純な物質から複雑な物質を作る反応", "answer": "ドウカ", "r": 22, "c": 10, "dir": "V", "length": 3}, {"num": 59, "clue": "岩のすきまに付く甲殻類", "answer": "カメノテ", "r": 22, "c": 23, "dir": "V", "length": 4}, {"num": 61, "clue": "計画的に起こる細胞死", "answer": "アポトーシス", "r": 23, "c": 20, "dir": "V", "length": 6}, {"num": 62, "clue": "種が占める生態的な地位", "answer": "ニッチ", "r": 24, "c": 0, "dir": "V", "length": 3}, {"num": 63, "clue": "背に模様のある青魚", "answer": "サバ", "r": 24, "c": 5, "dir": "V", "length": 2}, {"num": 66, "clue": "アミノ酸を指定する三塩基", "answer": "コドン", "r": 26, "c": 18, "dir": "V", "length": 3}, {"num": 67, "clue": "電子線で観察する顕微鏡", "answer": "デンシケンビキョウ", "r": 27, "c": 16, "dir": "V", "length": 9}, {"num": 69, "clue": "発光で光る基質", "answer": "ルシフェリン", "r": 28, "c": 5, "dir": "V", "length": 6}, {"num": 70, "clue": "サンゴをかじる色鮮やかな魚", "answer": "ブダイ", "r": 28, "c": 10, "dir": "V", "length": 3}, {"num": 71, "clue": "岩場に残る潮の水たまり", "answer": "シオダマリ", "r": 28, "c": 12, "dir": "V", "length": 5}, {"num": 72, "clue": "イントロンを除く編集", "answer": "スプライシング", "r": 29, "c": 23, "dir": "V", "length": 7}, {"num": 73, "clue": "毛や爪を作るタンパク質", "answer": "ケラチン", "r": 29, "c": 27, "dir": "V", "length": 4}, {"num": 75, "clue": "水流を感じる魚の感覚器", "answer": "ソクセン", "r": 30, "c": 7, "dir": "V", "length": 4}, {"num": 77, "clue": "貝殻を持たない巻貝のなかま", "answer": "ウミウシ", "r": 30, "c": 21, "dir": "V", "length": 4}, {"num": 80, "clue": "クジラの主食の甲殻類", "answer": "オキアミ", "r": 32, "c": 11, "dir": "V", "length": 4}, {"num": 81, "clue": "異なる海水が接する境目", "answer": "シオメ", "r": 32, "c": 14, "dir": "V", "length": 3}, {"num": 82, "clue": "ナメクジウオなど脊索を持つ無脊椎", "answer": "ゲンサクドウブツ", "r": 32, "c": 18, "dir": "V", "length": 8}, {"num": 84, "clue": "かく乱の程度", "answer": "カクランド", "r": 32, "c": 26, "dir": "V", "length": 5}, {"num": 86, "clue": "余分な塩を排出する器官", "answer": "エンルイセン", "r": 34, "c": 20, "dir": "V", "length": 6}, {"num": 89, "clue": "大型で知られる肉食のサメ", "answer": "ホホジロザメ", "r": 35, "c": 15, "dir": "V", "length": 6}, {"num": 91, "clue": "さまざまな細胞になれる未分化の細胞", "answer": "カンサイボウ", "r": 36, "c": 27, "dir": "V", "length": 6}, {"num": 94, "clue": "イワシなどの稚魚", "answer": "シラス", "r": 37, "c": 23, "dir": "V", "length": 3}, {"num": 95, "clue": "釣り餌にも使う環形動物", "answer": "ゴカイ", "r": 37, "c": 29, "dir": "V", "length": 3}], "keyword": "テキオウホウサン", "keylen": 8, "bbox": [42, 42]};
+const key=(r,c)=>r+","+c;
+const cellMap=new Map();DATA.cells.forEach(c=>cellMap.set(key(c.r,c.c),c));
+const keyCells=DATA.cells.filter(c=>c.key).sort((a,b)=>a.key-b.key);
+function cellsOf(e){const dr=e.dir==="H"?0:1,dc=e.dir==="H"?1:0,o=[];for(let i=0;i<e.length;i++)o.push([e.r+dr*i,e.c+dc*i]);return o;}
+const entries=[...DATA.across.map(e=>({...e})),...DATA.down.map(e=>({...e}))];
+entries.forEach(e=>e.path=cellsOf(e));
+const state={values:new Map(),sel:null,dir:"H",locked:new Set(),lastCommitted:null};
+const isTouch=window.matchMedia("(pointer:coarse)").matches||("ontouchstart"in window);
+
+const gridEl=document.getElementById("grid");
+const entryEl=document.getElementById("entry");
+const scrollEl=document.getElementById("scroll");
+
+function buildGrid(){
+  const frag=document.createDocumentFragment();
+  for(let r=0;r<DATA.rows;r++)for(let c=0;c<DATA.cols;c++){
+    const cd=cellMap.get(key(r,c));const div=document.createElement("div");
+    if(!cd){div.className="cell block";frag.appendChild(div);continue;}
+    div.className="cell fill";div.dataset.r=r;div.dataset.c=c;if(cd.key)div.dataset.key=cd.key;
+    if(cd.num){const n=document.createElement("span");n.className="num";n.textContent=cd.num;div.appendChild(n);}
+    const kb=document.createElement("span");kb.className="kbadge";div.appendChild(kb);
+    const l=document.createElement("span");l.className="letter";div.appendChild(l);
+    div.addEventListener("click",()=>onCellClick(r,c));
+    frag.appendChild(div);
+  }
+  gridEl.appendChild(frag);
+}
+function cellDiv(r,c){return gridEl.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]');}
+function wordAt(r,c,dir){return entries.find(e=>e.dir===dir&&e.path.some(([pr,pc])=>pr===r&&pc===c));}
+function hasBoth(r,c){return{h:entries.find(e=>e.dir==="H"&&e.path.some(([pr,pc])=>pr===r&&pc===c)),v:entries.find(e=>e.dir==="V"&&e.path.some(([pr,pc])=>pr===r&&pc===c))};}
+
+function onCellClick(r,c){
+  const {h,v}=hasBoth(r,c);
+  if(state.sel&&state.sel[0]===r&&state.sel[1]===c){if(h&&v)state.dir=state.dir==="H"?"V":"H";}
+  else{if(!h&&v)state.dir="V";if(!v&&h)state.dir="H";}
+  state.sel=[r,c];refresh();scrollSel();
+  keepFocus();
+}
+function scrollSel(){if(!state.sel)return;const d=cellDiv(...state.sel);if(d)d.scrollIntoView({block:"nearest",inline:"nearest"});}
+function focusEntry(){if(!state.sel)return;const d=cellDiv(...state.sel);if(!d)return;
+  entryEl.style.pointerEvents="auto";entryEl.style.left=d.offsetLeft+"px";entryEl.style.top=d.offsetTop+"px";entryEl.value="";
+  setTimeout(()=>entryEl.focus({preventScroll:true}),0);}
+const CIRC=n=>String.fromCodePoint(0x245F+n);
+function refresh(){
+  document.querySelectorAll(".cell.fill").forEach(d=>{
+    d.classList.remove("inword","sel","correct","wrong");
+    const r=+d.dataset.r,c=+d.dataset.c,k=key(r,c);
+    const v=state.values.get(k)||"";
+    d.querySelector(".letter").textContent=v;
+    if(d.dataset.key){
+      const ok=normEq(v,cellMap.get(k).ch);
+      d.classList.toggle("key",!!ok);
+      d.querySelector(".kbadge").textContent=ok?CIRC(+d.dataset.key):"";
+    }
+    if(state.locked.has(k))d.classList.add("correct");
+  });
+  if(state.sel){const w=wordAt(state.sel[0],state.sel[1],state.dir);
+    if(w)w.path.forEach(([r,c])=>{const e=cellDiv(r,c);if(e)e.classList.add("inword");});
+    const sd=cellDiv(...state.sel);if(sd)sd.classList.add("sel");highlightClue(w);}
+  renderSlots();markSolved();updateProgress();
+}
+function updateProgress(){let f=0;const t=DATA.cells.length;DATA.cells.forEach(cd=>{if(state.values.get(key(cd.r,cd.c)))f++;});
+  const pc=t?Math.round(f/t*100):0;const fill=document.getElementById("pfill");if(fill)fill.style.width=pc+"%";
+  const el=document.getElementById("pct");if(el)el.textContent="回答 "+f+" / "+t+"（"+pc+"%）";}
+function setCurClue(w){const el=document.getElementById("curclue");if(!el)return;
+  if(!w){el.innerHTML='<span class="cdir">ヨコ</span><span class="ctxt">マスをタップして始めよう</span>';return;}
+  const dir=w.dir==="H"?"ヨコ":"タテ";
+  el.innerHTML='<span class="cdir">'+dir+w.num+'</span><span class="ctxt">'+w.clue+'（'+w.length+'）</span>';}
+function highlightClue(w){document.querySelectorAll(".cluelist li").forEach(li=>li.classList.remove("activeclue"));
+  setCurClue(w);
+  if(w){const li=document.querySelector('li[data-dir="'+w.dir+'"][data-num="'+w.num+'"]');if(li){li.classList.add("activeclue");li.scrollIntoView({block:"nearest"});}}}
+
+/* ---- input core ---- */
+function hiraToKata(s){let o="";for(const ch of s){const cp=ch.codePointAt(0);o+=(cp>=0x3041&&cp<=0x3096)?String.fromCodePoint(cp+0x60):ch;}return o;}
+function isKana(ch){const cp=ch.codePointAt(0);return cp>=0x30A0&&cp<=0x30FF;}
+/* tolerant compare: small<->large, dakuten/handakuten<->base (ツ=ッ, タ=ダ ...) */
+const SMALL={'ァ':'ア','ィ':'イ','ゥ':'ウ','ェ':'エ','ォ':'オ','ッ':'ツ','ャ':'ヤ','ュ':'ユ','ョ':'ヨ','ヮ':'ワ'};
+const DAKU={'ガ':'カ','ギ':'キ','グ':'ク','ゲ':'ケ','ゴ':'コ','ザ':'サ','ジ':'シ','ズ':'ス','ゼ':'セ','ゾ':'ソ','ダ':'タ','ヂ':'チ','ヅ':'ツ','デ':'テ','ド':'ト','バ':'ハ','ビ':'ヒ','ブ':'フ','ベ':'ヘ','ボ':'ホ','パ':'ハ','ピ':'ヒ','プ':'フ','ペ':'ヘ','ポ':'ホ','ヴ':'ウ'};
+function norm(ch){if(!ch)return ch;ch=SMALL[ch]||ch;ch=DAKU[ch]||ch;return ch;}
+function normEq(a,b){return !!a&&!!b&&norm(a)===norm(b);}
+function nativeKb(){return isTouch&&!document.getElementById('kbWin').classList.contains('show');}
+function keepFocus(){if(!isTouch||nativeKb())focusEntry();}
+function commitChar(ch){if(!state.sel)return;const k=key(...state.sel);
+  if(state.locked.has(k)){advance();return;}
+  state.values.set(k,ch);state.lastCommitted=[...state.sel];refresh();save();advance();}
+function advance(){if(!state.sel)return;const w=wordAt(state.sel[0],state.sel[1],state.dir);if(!w)return;
+  const i=w.path.findIndex(([r,c])=>r===state.sel[0]&&c===state.sel[1]);
+  if(i+1<w.path.length){state.sel=w.path[i+1];refresh();scrollSel();keepFocus();return;}
+  refresh();keepFocus();}
+function backspace(){if(!state.sel)return;const k=key(...state.sel);
+  if(state.values.get(k)){state.values.delete(k);state.locked.delete(k);refresh();save();keepFocus();return;}
+  const w=wordAt(state.sel[0],state.sel[1],state.dir);if(!w)return;
+  const i=w.path.findIndex(([r,c])=>r===state.sel[0]&&c===state.sel[1]);
+  if(i-1>=0){state.sel=w.path[i-1];state.values.delete(key(...state.sel));state.locked.delete(key(...state.sel));refresh();save();scrollSel();keepFocus();}}
+
+/* dakuten / small cycle */
+const CYCLE={'ア':'ァ','ァ':'ア','イ':'ィ','ィ':'イ','ウ':'ヴ','ヴ':'ゥ','ゥ':'ウ','エ':'ェ','ェ':'エ','オ':'ォ','ォ':'オ',
+'カ':'ガ','ガ':'カ','キ':'ギ','ギ':'キ','ク':'グ','グ':'ク','ケ':'ゲ','ゲ':'ケ','コ':'ゴ','ゴ':'コ',
+'サ':'ザ','ザ':'サ','シ':'ジ','ジ':'シ','ス':'ズ','ズ':'ス','セ':'ゼ','ゼ':'セ','ソ':'ゾ','ゾ':'ソ',
+'タ':'ダ','ダ':'タ','チ':'ヂ','ヂ':'チ','ツ':'ッ','ッ':'ヅ','ヅ':'ツ','テ':'デ','デ':'テ','ト':'ド','ド':'ト',
+'ハ':'バ','バ':'パ','パ':'ハ','ヒ':'ビ','ビ':'ピ','ピ':'ヒ','フ':'ブ','ブ':'プ','プ':'フ','ヘ':'ベ','ベ':'ペ','ペ':'ヘ','ホ':'ボ','ボ':'ポ','ポ':'ホ',
+'ヤ':'ャ','ャ':'ヤ','ユ':'ュ','ュ':'ユ','ヨ':'ョ','ョ':'ヨ','ワ':'ヮ','ヮ':'ワ'};
+function applyModifier(){const lc=state.lastCommitted;if(!lc)return;const k=key(...lc);const cur=state.values.get(k);if(!cur)return;const nx=CYCLE[cur];if(nx){state.values.set(k,nx);refresh();}}
+
+/* physical / native keyboard: live romaji -> katakana (no IME / Enter needed) */
+let composing=false, justComposed=false;
+const ROMA={
+ "a":"ア","i":"イ","u":"ウ","e":"エ","o":"オ",
+ "ka":"カ","ki":"キ","ku":"ク","ke":"ケ","ko":"コ","ca":"カ","cu":"ク","co":"コ",
+ "kya":"キャ","kyu":"キュ","kyo":"キョ","kye":"キェ",
+ "ga":"ガ","gi":"ギ","gu":"グ","ge":"ゲ","go":"ゴ","gya":"ギャ","gyu":"ギュ","gyo":"ギョ",
+ "sa":"サ","si":"シ","shi":"シ","su":"ス","se":"セ","so":"ソ","sha":"シャ","sya":"シャ","shu":"シュ","syu":"シュ","sho":"ショ","syo":"ショ","she":"シェ",
+ "za":"ザ","zi":"ジ","ji":"ジ","zu":"ズ","ze":"ゼ","zo":"ゾ","ja":"ジャ","jya":"ジャ","ju":"ジュ","jyu":"ジュ","jo":"ジョ","jyo":"ジョ","je":"ジェ",
+ "ta":"タ","ti":"チ","chi":"チ","tu":"ツ","tsu":"ツ","te":"テ","to":"ト","cha":"チャ","cya":"チャ","chu":"チュ","cyu":"チュ","cho":"チョ","cyo":"チョ","che":"チェ","tsa":"ツァ","tsi":"ツィ","tse":"ツェ","tso":"ツォ","tha":"テャ","thi":"ティ","thu":"テュ",
+ "da":"ダ","di":"ヂ","du":"ヅ","de":"デ","do":"ド","dya":"ヂャ","dyu":"ヂュ","dyo":"ヂョ","dha":"デャ","dhi":"ディ","dhu":"デュ",
+ "na":"ナ","ni":"ニ","nu":"ヌ","ne":"ネ","no":"ノ","nya":"ニャ","nyu":"ニュ","nyo":"ニョ","nn":"ン","n":"ン",
+ "ha":"ハ","hi":"ヒ","hu":"フ","fu":"フ","he":"ヘ","ho":"ホ","hya":"ヒャ","hyu":"ヒュ","hyo":"ヒョ","fa":"ファ","fi":"フィ","fe":"フェ","fo":"フォ","fya":"フャ","fyu":"フュ","fyo":"フョ",
+ "ba":"バ","bi":"ビ","bu":"ブ","be":"ベ","bo":"ボ","bya":"ビャ","byu":"ビュ","byo":"ビョ",
+ "pa":"パ","pi":"ピ","pu":"プ","pe":"ペ","po":"ポ","pya":"ピャ","pyu":"ピュ","pyo":"ピョ",
+ "ma":"マ","mi":"ミ","mu":"ム","me":"メ","mo":"モ","mya":"ミャ","myu":"ミュ","myo":"ミョ",
+ "ya":"ヤ","yu":"ユ","yo":"ヨ",
+ "ra":"ラ","ri":"リ","ru":"ル","re":"レ","ro":"ロ","rya":"リャ","ryu":"リュ","ryo":"リョ","la":"ラ","li":"リ","lu":"ル","le":"レ","lo":"ロ",
+ "wa":"ワ","wo":"ヲ","wi":"ウィ","we":"ウェ","wu":"ウ",
+ "va":"ヴァ","vi":"ヴィ","vu":"ヴ","ve":"ヴェ","vo":"ヴォ",
+ "xa":"ァ","xi":"ィ","xu":"ゥ","xe":"ェ","xo":"ォ","xtu":"ッ","xtsu":"ッ","ltu":"ッ","ltsu":"ッ","xya":"ャ","xyu":"ュ","xyo":"ョ","xwa":"ヮ",
+ "la":"ァ","li":"ィ","lu":"ゥ","le":"ェ","lo":"ォ","lya":"ャ","lyu":"ュ","lyo":"ョ","lwa":"ヮ","xka":"ヵ","xke":"ヶ","lka":"ヵ","lke":"ヶ",
+ "-":"ー","ー":"ー"
+};
+const ROMA_KEYS=Object.keys(ROMA);
+function romaToKana(buf){
+  const out=[];let s=buf;let guard=0;
+  while(s.length&&guard++<64){
+    const c0=s[0];
+    if(c0>='\u3041'&&c0<='\u3096'){out.push(hiraToKata(c0));s=s.slice(1);continue;}      // hiragana passthrough
+    if((c0>='\u30A1'&&c0<='\u30FA')||c0==='ー'){out.push(c0);s=s.slice(1);continue;}        // katakana passthrough
+    const lc=c0.toLowerCase();
+    if(s.length>=2&&lc===s[1].toLowerCase()&&"kstpcghjrbfmdz".includes(lc)&&lc!=='n'){out.push("ッ");s=s.slice(1);continue;} // double consonant
+    if(lc==='n'&&s.length>=2){const n1=s[1].toLowerCase();if(n1!=='n'&&n1!=='y'&&!"aiueo".includes(n1)){out.push("ン");s=s.slice(1);continue;}}
+    let matched=null,ml=0;
+    for(let L=Math.min(4,s.length);L>=1;L--){const seg=s.slice(0,L).toLowerCase();if(ROMA[seg]){matched=ROMA[seg];ml=L;break;}}
+    if(matched){const seg=s.slice(0,ml).toLowerCase();
+      if(seg==='n'&&ml===s.length)break;                 // lone n: wait for next key
+      for(const ch of matched)out.push(ch);s=s.slice(ml);continue;}
+    const low=s.toLowerCase();
+    if(ROMA_KEYS.some(k=>k.startsWith(low)))break;        // incomplete romaji: wait
+    s=s.slice(1);                                         // drop unknown char
+  }
+  return {kana:out,rest:s};
+}
+function handleBuffer(){const res=romaToKana(entryEl.value);for(const ch of res.kana)commitChar(ch);entryEl.value=res.rest;}
+function flushN(){if(entryEl.value.toLowerCase()==='n'){entryEl.value="";commitChar("ン");}}
+function showIme(){if(window.__imeHidden)return;const w=document.getElementById('imeWarn');if(w)w.classList.add('show');}
+function hideIme(){const w=document.getElementById('imeWarn');if(w)w.classList.remove('show');}
+entryEl.addEventListener("compositionstart",()=>{composing=true;showIme();});
+entryEl.addEventListener("compositionend",e=>{composing=false;justComposed=true;
+  const txt=hiraToKata(e.target.value);for(const ch of txt){if(isKana(ch))commitChar(ch);}
+  e.target.value="";setTimeout(()=>{justComposed=false;},0);});
+entryEl.addEventListener("input",e=>{if(composing||e.isComposing)return;if(justComposed){justComposed=false;entryEl.value="";return;}hideIme();handleBuffer();});
+entryEl.addEventListener("keydown",e=>{
+  if(e.isComposing||e.keyCode===229||e.key==="Process"){showIme();return;}
+  if(composing)return;
+  if(/^[a-z]$/i.test(e.key))hideIme();
+  if(e.key==="Backspace"){if(entryEl.value.length)return;e.preventDefault();backspace();}
+  else if(e.key==="Enter"||e.key===" "){e.preventDefault();flushN();}
+  else if(e.key.startsWith("Arrow")){e.preventDefault();flushN();arrowMove(e.key);}});
+function arrowMove(kk){if(!state.sel)return;let[r,c]=state.sel;const m={ArrowRight:[0,1],ArrowLeft:[0,-1],ArrowUp:[-1,0],ArrowDown:[1,0]}[kk];
+  for(let i=0;i<DATA.cols;i++){r+=m[0];c+=m[1];if(r<0||c<0||r>=DATA.rows||c>=DATA.cols)return;if(cellMap.get(key(r,c))){onCellClick(r,c);return;}}}
+/* ---- save / resume ---- */
+const SAVEKEY="umicw:h2:v2";
+let saveTimer=null;
+function save(){try{localStorage.setItem(SAVEKEY,JSON.stringify([...state.values]));}catch(e){}
+  const el=document.getElementById("saveState");if(el){el.textContent="✓ 保存しました";el.classList.add("flash");clearTimeout(saveTimer);saveTimer=setTimeout(()=>{el.textContent="じどう保存";el.classList.remove("flash");},1200);}}
+function load(){try{const r=localStorage.getItem(SAVEKEY);if(r)JSON.parse(r).forEach(([k,v])=>state.values.set(k,v));}catch(e){}}
+function clearSave(){try{localStorage.removeItem(SAVEKEY);}catch(e){}}
+
+/* ---------- gojuon keyboard ---------- */
+const MAIN=["ア","イ","ウ","エ","オ","カ","キ","ク","ケ","コ","サ","シ","ス","セ","ソ","タ","チ","ツ","テ","ト","ナ","ニ","ヌ","ネ","ノ","ハ","ヒ","フ","ヘ","ホ","マ","ミ","ム","メ","モ","ヤ","","ユ","","ヨ","ラ","リ","ル","レ","ロ","ワ","","ヲ","","ン"];
+const EXTRA=["ガ","ギ","グ","ゲ","ゴ","ザ","ジ","ズ","ゼ","ゾ","ダ","ヂ","ヅ","デ","ド","バ","ビ","ブ","ベ","ボ","パ","ピ","プ","ペ","ポ","ヴ","ッ","ャ","ュ","ョ","ー","ヮ"];
+function buildGoju(){
+  const m=document.getElementById("kb-main");if(!m)return; /* 50音は廃止 */
+  MAIN.forEach(ch=>{const b=document.createElement("button");if(ch===""){b.className="key ghost";b.disabled=true;}else{b.className="key";b.textContent=ch;b.addEventListener("click",()=>commitChar(ch));}m.appendChild(b);});
+  const x=document.getElementById("kb-extra");
+  EXTRA.forEach(ch=>{const b=document.createElement("button");b.className="key";b.textContent=ch;b.addEventListener("click",()=>commitChar(ch));x.appendChild(b);});
+  const del=document.createElement("button");del.className="key wide act";del.textContent="けす";del.addEventListener("click",backspace);x.appendChild(del);
+  const nx=document.createElement("button");nx.className="key wide";nx.textContent="つぎ→";nx.addEventListener("click",()=>{if(state.sel)advance();});x.appendChild(nx);
+}
+
+/* ---------- flick keyboard ---------- */
+const FLICK={
+ "ア":{c:"ア",l:"イ",u:"ウ",r:"エ",d:"オ"},
+ "カ":{c:"カ",l:"キ",u:"ク",r:"ケ",d:"コ"},
+ "サ":{c:"サ",l:"シ",u:"ス",r:"セ",d:"ソ"},
+ "タ":{c:"タ",l:"チ",u:"ツ",r:"テ",d:"ト"},
+ "ナ":{c:"ナ",l:"ニ",u:"ヌ",r:"ネ",d:"ノ"},
+ "ハ":{c:"ハ",l:"ヒ",u:"フ",r:"ヘ",d:"ホ"},
+ "マ":{c:"マ",l:"ミ",u:"ム",r:"メ",d:"モ"},
+ "ヤ":{c:"ヤ",u:"ユ",d:"ヨ"},
+ "ラ":{c:"ラ",l:"リ",u:"ル",r:"レ",d:"ロ"},
+ "ワ":{c:"ワ",l:"ヲ",u:"ン",d:"ー"}
+};
+const FORDER=["ア","カ","サ","タ","ナ","ハ","マ","ヤ","ラ"];
+function buildFlick(){
+  const f=document.getElementById("flick");
+  FORDER.forEach(g=>{
+    const k=document.createElement("div");k.className="fkey";k.dataset.g=g;
+    const m=FLICK[g];const others=[m.l,m.u,m.r,m.d].filter(Boolean).join(" ");
+    k.innerHTML=g+'<span class="sub">'+others+'</span>';
+    attachFlick(k);f.appendChild(k);
+  });
+  // 4th row: modifier, ワ, ー
+  const mod=document.createElement("div");mod.className="fkey func";mod.dataset.g="mod";mod.innerHTML='小゛゜';
+  mod.addEventListener("click",applyModifier);
+  const wa=document.createElement("div");wa.className="fkey";wa.dataset.g="ワ";
+  wa.innerHTML='ワ<span class="sub">ヲ ン ー</span>';attachFlick(wa);
+  const cho=document.createElement("div");cho.className="fkey func";cho.dataset.g="cho";cho.innerHTML='ー';
+  cho.addEventListener("click",()=>commitChar("ー"));
+  f.appendChild(mod);f.appendChild(wa);f.appendChild(cho);
+  // functions row
+  const fns=document.getElementById("flickFns");
+  const del=document.createElement("div");del.className="fkey func";del.textContent="けす";del.addEventListener("click",backspace);
+  const nx=document.createElement("div");nx.className="fkey func";nx.textContent="つぎ →";nx.addEventListener("click",()=>{if(state.sel)advance();});
+  fns.appendChild(del);fns.appendChild(nx);
+}
+const guide=document.getElementById("guide");
+const gpads={c:guide.querySelector(".gpad.c"),u:guide.querySelector(".gpad.u"),d:guide.querySelector(".gpad.d"),l:guide.querySelector(".gpad.l"),r:guide.querySelector(".gpad.r")};
+let flickActive=null;
+function attachFlick(el){
+  el.addEventListener("pointerdown",e=>{
+    e.preventDefault();const m=FLICK[el.dataset.g];if(!m)return;
+    el.classList.add("pressing");el.setPointerCapture(e.pointerId);
+    flickActive={el,m,sx:e.clientX,sy:e.clientY,dir:"c"};
+    showGuide(el,m);
+  });
+  el.addEventListener("pointermove",e=>{if(!flickActive||flickActive.el!==el)return;updateFlick(e.clientX,e.clientY);});
+  el.addEventListener("pointerup",e=>{if(!flickActive||flickActive.el!==el)return;
+    const ch=flickActive.m[flickActive.dir];el.classList.remove("pressing");hideGuide();
+    const fa=flickActive;flickActive=null;if(ch)commitChar(ch);});
+  el.addEventListener("pointercancel",()=>{el.classList.remove("pressing");hideGuide();flickActive=null;});
+}
+function dirOf(dx,dy){const TH=22;if(Math.hypot(dx,dy)<TH)return"c";if(Math.abs(dx)>Math.abs(dy))return dx<0?"l":"r";return dy<0?"u":"d";}
+function updateFlick(x,y){const dir=dirOf(x-flickActive.sx,y-flickActive.sy);flickActive.dir=dir;
+  for(const k in gpads)gpads[k].classList.toggle("active",k===dir);}
+function showGuide(el,m){
+  const rc=el.getBoundingClientRect();
+  guide.style.left=(rc.left+rc.width/2-75)+"px";guide.style.top=(rc.top+rc.height/2-75)+"px";
+  for(const k of ["c","u","d","l","r"]){const ch=m[k];gpads[k].textContent=ch||"";gpads[k].classList.toggle("empty",!ch);gpads[k].classList.toggle("active",k==="c");}
+  guide.classList.add("show");
+}
+function hideGuide(){guide.classList.remove("show");}
+
+/* keyboard is flick-only now (no 50音). */
+function setMode(){}
+
+/* ---------- clues ---------- */
+function buildClues(){
+  const a=document.getElementById("across"),d=document.getElementById("down");
+  const mk=e=>{const li=document.createElement("li");li.dataset.dir=e.dir;li.dataset.num=e.num;li.dataset.txt=e.clue+e.answer;
+    li.innerHTML='<span class="cnum">'+e.num+'</span><span>'+e.clue+'（'+e.length+'）</span>';
+    li.addEventListener("click",()=>{state.dir=e.dir;onCellClick(e.r,e.c);});return li;};
+  DATA.across.forEach(e=>a.appendChild(mk(e)));DATA.down.forEach(e=>d.appendChild(mk(e)));
+}
+function entrySolved(e){return e.path.every(([r,c])=>normEq(state.values.get(key(r,c)),cellMap.get(key(r,c)).ch));}
+function markSolved(){entries.forEach(e=>{const li=document.querySelector('li[data-dir="'+e.dir+'"][data-num="'+e.num+'"]');if(li)li.classList.toggle("solved",entrySolved(e));});}
+document.getElementById("clueFilter").addEventListener("input",e=>{const q=e.target.value.trim();
+  document.querySelectorAll(".cluelist li").forEach(li=>{li.style.display=(!q||li.dataset.txt.includes(q))?"":"none";});});
+
+/* ---------- slots ---------- */
+function buildSlots(){const s=document.getElementById("slots");keyCells.forEach(c=>{const d=document.createElement("div");d.className="slot";d.dataset.k=c.key;d.innerHTML='<span class="n">'+c.key+'</span><span class="v"></span>';s.appendChild(d);});}
+function renderSlots(){keyCells.forEach(c=>{const slot=document.querySelector('.slot[data-k="'+c.key+'"]');const v=state.values.get(key(c.r,c.c))||"";const ok=normEq(v,c.ch);slot.querySelector(".v").textContent=ok?v:"";slot.classList.toggle("done",!!ok);});}
+
+/* ---------- check / win ---------- */
+document.getElementById("check").addEventListener("click",()=>{
+  let wrong=0,filled=0,total=DATA.cells.length;
+  DATA.cells.forEach(cd=>{const k=key(cd.r,cd.c),v=state.values.get(k),d=cellDiv(cd.r,cd.c);d.classList.remove("wrong");
+    if(v)filled++;if(normEq(v,cd.ch))state.locked.add(k);else if(v&&!normEq(v,cd.ch)){d.classList.add("wrong");wrong++;}});
+  refresh();const msg=document.getElementById("msg");
+  if(filled<total){msg.textContent="まだ "+(total-filled)+" マス のこっています。";msg.style.color="var(--sea)";}
+  else if(wrong===0)win();
+  else{msg.textContent="おしい！ "+wrong+" マス ちがうようです。赤いマスを見直そう。";msg.style.color="var(--wrong)";}
+});
+function win(){document.getElementById("msg").textContent="";const ov=document.getElementById("overlay");ov.classList.add("show");
+  try{localStorage.setItem("umicw:solved:h2","1");}catch(e){}
+  document.getElementById("kwGate").style.display="";document.getElementById("kwDone").style.display="none";
+  const km=document.getElementById("kwMsg");if(km)km.textContent="";
+  const ki=document.getElementById("kwInput");if(ki){ki.value="";setTimeout(()=>{try{ki.focus();}catch(e){}},250);}
+  const bb=document.getElementById("bubbles");bb.innerHTML="";for(let i=0;i<18;i++){const s=document.createElement("span");const sz=8+Math.random()*28;s.style.width=s.style.height=sz+"px";s.style.left=Math.random()*100+"%";s.style.animationDuration=(3+Math.random()*3)+"s";s.style.animationDelay=(Math.random()*2)+"s";bb.appendChild(s);}}
+function kwFold(s){let o="";for(const ch of s)o+=(SMALL[ch]||ch);return o;}
+function submitKeyword(){
+  const ki=document.getElementById("kwInput");let raw=(ki.value||"").trim();if(!raw)return;
+  let kata = /[A-Za-z]/.test(raw) ? romaToKana(raw).kana.join("") : hiraToKata(raw);
+  kata=kata.replace(/[\s　ー・]/g,"");const target=(DATA.keyword||"");
+  const ok = kwFold(kata)===kwFold(target);
+  if(ok){
+    try{localStorage.setItem("umicw:done:h2","1");}catch(e){}
+    document.getElementById("kwGate").style.display="none";
+    document.getElementById("kwDone").style.display="";
+  }else{
+    const m=document.getElementById("kwMsg");m.textContent="ちがうみたい。金色のマスを ①→②→③… の順に読んでみよう。";
+    ki.classList.remove("shake");void ki.offsetWidth;ki.classList.add("shake");
+  }
+}
+document.getElementById("kwSubmit").addEventListener("click",submitKeyword);
+document.getElementById("kwInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();submitKeyword();}});
+let staffOn=false, staffSnap=null;
+document.getElementById("staff").addEventListener("click",e=>{staffOn=!staffOn;
+  if(staffOn){staffSnap=new Map(state.values);DATA.cells.forEach(cd=>{state.values.set(key(cd.r,cd.c),cd.ch);});e.target.textContent="こたえを隠す";}
+  else{state.values=staffSnap||new Map();staffSnap=null;e.target.textContent="こたえを見る";document.getElementById("msg").textContent="";}refresh();});
+function resetAll(){state.values.clear();state.locked.clear();state.sel=null;state.lastCommitted=null;staffOn=false;staffSnap=null;document.getElementById("staff").textContent="こたえを見る";document.getElementById("msg").textContent="";document.querySelectorAll(".cell.fill").forEach(d=>d.classList.remove("wrong","correct","inword","sel","key"));clearSave();refresh();}
+document.getElementById("reset").addEventListener("click",resetAll);
+document.getElementById("again").addEventListener("click",()=>{document.getElementById("overlay").classList.remove("show");resetAll();});
+
+/* ---------- floating windows ---------- */
+function makeDraggable(win,bar){
+  let drag=null;
+  bar.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;
+    const r=win.getBoundingClientRect();drag={dx:e.clientX-r.left,dy:e.clientY-r.top};
+    win.style.left=r.left+"px";win.style.top=r.top+"px";win.style.right="auto";win.style.bottom="auto";
+    bar.setPointerCapture(e.pointerId);});
+  bar.addEventListener("pointermove",e=>{if(!drag)return;
+    let x=e.clientX-drag.dx,y=e.clientY-drag.dy;
+    x=Math.max(4,Math.min(window.innerWidth-60,x));y=Math.max(4,Math.min(window.innerHeight-40,y));
+    win.style.left=x+"px";win.style.top=y+"px";});
+  bar.addEventListener("pointerup",()=>{drag=null;});
+  bar.addEventListener("pointercancel",()=>{drag=null;});
+}
+const cluesWin=document.getElementById("cluesWin"),kbWin=document.getElementById("kbWin");
+makeDraggable(cluesWin,document.getElementById("cluesBar"));
+makeDraggable(kbWin,document.getElementById("kbBar"));
+let zTop=70;function raise(w){zTop++;w.style.zIndex=zTop;}
+cluesWin.addEventListener("pointerdown",()=>raise(cluesWin));
+kbWin.addEventListener("pointerdown",()=>raise(kbWin));
+/* long-press the clue window to make it translucent (and back) */
+(function(){let t=null;const cancel=()=>{if(t){clearTimeout(t);t=null;}};
+  cluesWin.addEventListener("pointerdown",()=>{cancel();t=setTimeout(()=>{cluesWin.classList.toggle("trans");},480);});
+  cluesWin.addEventListener("pointerup",cancel);cluesWin.addEventListener("pointermove",cancel);cluesWin.addEventListener("pointercancel",cancel);})();
+function toggleWin(win,btn){const show=!win.classList.contains("show");win.classList.toggle("show",show);if(btn)btn.classList.toggle("on",show);}
+document.getElementById("t-clues").addEventListener("click",e=>toggleWin(cluesWin,e.currentTarget));
+document.getElementById("t-kb").addEventListener("click",e=>{toggleWin(kbWin,e.currentTarget);
+  if(isTouch){ if(kbWin.classList.contains("show"))entryEl.blur(); else keepFocus(); }});
+document.getElementById("cluesClose").addEventListener("click",()=>toggleWin(cluesWin,document.getElementById("t-clues")));
+document.getElementById("kbClose").addEventListener("click",()=>toggleWin(kbWin,document.getElementById("t-kb")));
+document.getElementById("cluesMin").addEventListener("click",()=>cluesWin.classList.toggle("min"));
+document.getElementById("kbMin").addEventListener("click",()=>kbWin.classList.toggle("min"));
+
+/* resizable windows (drag the bottom-right grip) */
+function makeResizable(win,handle,minW,minH){
+  let rs=null;
+  handle.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();
+    const r=win.getBoundingClientRect();rs={x:e.clientX,y:e.clientY,w:r.width,h:r.height};
+    win.classList.remove("min");win.style.width=r.width+"px";win.style.height=r.height+"px";
+    handle.setPointerCapture(e.pointerId);});
+  handle.addEventListener("pointermove",e=>{if(!rs)return;
+    let w=rs.w+(e.clientX-rs.x),h=rs.h+(e.clientY-rs.y);
+    w=Math.max(minW,Math.min(window.innerWidth*0.98,w));h=Math.max(minH,Math.min(window.innerHeight*0.95,h));
+    win.style.width=w+"px";win.style.height=h+"px";});
+  const end=()=>{rs=null;};handle.addEventListener("pointerup",end);handle.addEventListener("pointercancel",end);
+}
+makeResizable(cluesWin,document.getElementById("cluesResize"),220,140);
+makeResizable(kbWin,document.getElementById("kbResize"),150,120);
+
+/* IME warning close */
+document.getElementById("imeClose").addEventListener("click",()=>{window.__imeHidden=true;hideIme();});
+
+/* ---------- grid zoom ---------- */
+let cellPx=0, baseCell=20;
+function curCellPx(){const c=document.querySelector(".cell");return c?c.getBoundingClientRect().width:baseCell;}
+function applyZoom(px){cellPx=Math.max(12,Math.min(70,px));document.documentElement.style.setProperty("--cell",cellPx+"px");
+  document.getElementById("zoomLbl").textContent=Math.round(cellPx/baseCell*100)+"%";}
+function zoomReset(){cellPx=0;document.documentElement.style.removeProperty("--cell");document.getElementById("zoomLbl").textContent="100%";}
+document.getElementById("zoomIn").addEventListener("click",()=>applyZoom((cellPx||curCellPx())+4));
+document.getElementById("zoomOut").addEventListener("click",()=>applyZoom((cellPx||curCellPx())-4));
+document.getElementById("zoomLbl").addEventListener("click",zoomReset);
+scrollEl.addEventListener("wheel",e=>{if(e.ctrlKey){e.preventDefault();applyZoom((cellPx||curCellPx())+(e.deltaY<0?3:-3));}},{passive:false});
+/* pinch zoom */
+const tdist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+let pinch=null;
+scrollEl.addEventListener("touchstart",e=>{if(e.touches.length===2){pinch={d:tdist(e.touches),c:cellPx||curCellPx()};}},{passive:true});
+scrollEl.addEventListener("touchmove",e=>{if(pinch&&e.touches.length===2){e.preventDefault();applyZoom(pinch.c*tdist(e.touches)/pinch.d);}},{passive:false});
+scrollEl.addEventListener("touchend",e=>{if(e.touches.length<2)pinch=null;});
+
+/* place windows for mobile */
+function placeWindows(){
+  if(window.innerWidth<760){
+    /* キーボードは小さめに右下へ（盤面を覆わない）。あとから自由に移動・拡大縮小できる */
+    kbWin.style.left="auto";kbWin.style.right="8px";kbWin.style.width="min(260px,66vw)";kbWin.style.bottom="8px";kbWin.style.top="auto";
+    cluesWin.style.left="2vw";cluesWin.style.right="auto";cluesWin.style.width="96vw";cluesWin.style.top="92px";cluesWin.style.height="34vh";
+  }
+}
+
+/* ---------- init ---------- */
+buildGrid();buildClues();buildSlots();buildFlick();
+load();
+placeWindows();
+/* 問題ウィンドウは初期は閉じる（上部の「現在の問題」バーで解ける） */
+cluesWin.classList.remove("show");document.getElementById("t-clues").classList.remove("on");
+/* キーボードウィンドウも初期は閉じる：端末の標準キーボード（フリック等）で入力可。
+   画面内フリックが必要なときだけ ⌨️ ボタンで開く（窓は自由に縮小・移動できる） */
+kbWin.classList.remove("show");document.getElementById("t-kb").classList.remove("on");
+const KB_OPEN=(0===1);
+state.sel=[DATA.across[0].r,DATA.across[0].c];state.dir="H";
+refresh();scrollSel();
+baseCell=curCellPx();
+</script>
+</body>
+</html>
