@@ -455,7 +455,7 @@ function rankOf(acc,kpm){
 /* ===== ランキング =====
    LB_ENDPOINT に Google Apps Script の Web アプリ URL を貼ると、
    別のPC・スマホとも共有できる「みんなのランキング」になります（空ならこの端末だけ）。 */
-const LB_ENDPOINT = "const LB_ENDPOINT = "https://script.google.com/macros/s/AKfycbzP8d5y0Z4jL8fxOwjjPf2GCSx17u9HG_Xufxq4poAZSmQgp8jdkcFGtD1H2_p4jjCWtQ/exec"; // 例: "https://script.google.com/macros/s/XXXXX/exec"
+const LB_ENDPOINT = "https://script.google.com/macros/s/AKfycbzP8d5y0Z4jL8fxOwjjPf2GCSx17u9HG_Xufxq4poAZSmQgp8jdkcFGtD1H2_p4jjCWtQ/exec"; // 例: "https://script.google.com/macros/s/XXXXX/exec"
 const SHARED = !!LB_ENDPOINT;
 function lbKey(){return "umicw:type:hs:"+(opt.course?opt.course.id:"x")+":"+opt.time;}
 function getLocal(){try{return JSON.parse(localStorage.getItem(lbKey())||"[]");}catch(e){return[];}}
